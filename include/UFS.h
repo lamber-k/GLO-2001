@@ -63,6 +63,7 @@ typedef struct {
 } iNodeEntry;
 
 #define NUM_INODE_PER_BLOCK (BLOCK_SIZE/sizeof(iNodeEntry))
+#define NUM_DIR_ENTRY_PER_BLOCK (BLOCK_SIZE/sizeof(DirEntry))
 
 int bd_countfreeblocks(void);
 int bd_stat(const char *pFilename, gstat *pStat);
@@ -76,5 +77,12 @@ int bd_rmdir(const char *pDirName);
 int bd_rename(const char *pFilename, const char *pDest);
 int bd_readdir(const char *pDirLocation, DirEntry **ppListeFichiers);
 
+typedef unsigned char BOOL;
+
+#define TRUE 1
+#define FALSE (!(TRUE))
+#define PATH_DELIMITER "/"
+#define INODE_BLOCK(iNodeNum) (BASE_BLOCK_INODE + (iNodeNum / NUM_INODE_PER_BLOCK))
+#define INODE_IDX_ON_BLOCK(iNodeNum) (iNodeNum % NUM_INODE_PER_BLOCK)
 
 #endif

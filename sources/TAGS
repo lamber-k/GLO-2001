@@ -22,24 +22,29 @@ static int glofs_write(211,5887
 static struct fuse_operations glofs_oper 224,6508
 int main(239,6896
 
-UFS.c,413
-int NumberofDirEntry(8,152
-int min(12,219
-int max(16,267
-int GetDirFromPath(26,892
-int GetFilenameFromPath(56,1735
-void printiNode(81,2506
-int bd_countfreeblocks(98,3158
-int bd_stat(102,3203
-int bd_create(106,3269
-int bd_read(110,3323
-int bd_write(114,3415
-int bd_mkdir(118,3515
-int bd_hardlink(122,3568
-int bd_unlink(126,3658
-int bd_rmdir(130,3712
-int bd_rename(134,3765
-int bd_readdir(138,3846
+UFS.c,599
+int NumberofDirEntry(9,172
+int min(13,240
+int max(17,289
+int GetDirFromPath(27,915
+int GetFilenameFromPath(57,1791
+void printiNode(82,2577
+static inline BOOL isBlockFree(98,3217
+static int getINodeEntry(105,3449
+static int	findDirEntryByName(122,3942
+static int	resolveSection(151,4871
+static int	resolvePath(171,5580
+int	bd_countfreeblocks(209,6810
+int		bd_stat(227,7253
+int bd_create(240,7614
+int bd_read(244,7669
+int bd_write(248,7762
+int bd_mkdir(252,7863
+int bd_hardlink(256,7917
+int bd_unlink(260,8008
+int bd_rmdir(264,8063
+int bd_rename(268,8117
+int bd_readdir(272,8199
 
 main_ufs.c,17
 int main(17,469
