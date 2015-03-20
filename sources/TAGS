@@ -34,17 +34,17 @@ static int getINodeEntry(105,3449
 static int	findDirEntryByName(122,3942
 static int	resolveSection(151,4871
 static int	resolvePath(171,5580
-int	bd_countfreeblocks(209,6810
-int		bd_stat(227,7253
-int bd_create(240,7614
-int bd_read(244,7669
-int bd_write(248,7762
-int bd_mkdir(252,7863
-int bd_hardlink(256,7917
-int bd_unlink(260,8008
-int bd_rmdir(264,8063
-int bd_rename(268,8117
-int bd_readdir(272,8199
+int	bd_countfreeblocks(208,6803
+int		bd_stat(226,7246
+int bd_create(242,7667
+int bd_read(246,7722
+int bd_write(250,7815
+int bd_mkdir(254,7916
+int bd_hardlink(258,7970
+int bd_unlink(262,8061
+int bd_rmdir(266,8116
+int bd_rename(270,8170
+int bd_readdir(274,8252
 
 main_ufs.c,17
 int main(17,469

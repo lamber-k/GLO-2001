@@ -168,7 +168,7 @@ static int	resolveSection(const char *pathSection, iNodeEntry *currentINodeEntry
   return (0);
 }
 
-static int	resolvePath(const char *path, iNodeEntry *entryFound) {
+static int	resolvePath(char *path, iNodeEntry *entryFound) {
   iNodeEntry	currentINodeEntry;
   DirEntry	currentDirEntry;
   char		*saveptrPFilename;
@@ -225,14 +225,17 @@ int	bd_countfreeblocks(void) {
 
 int		bd_stat(const char *pFilename, gstat *pStat) {
   iNodeEntry	entryFound;
+  char		*path = strdup(pFilename);
 
-  if (resolvePath(pFilename, &entryFound) == -1) {
+  if (resolvePath(path, &entryFound) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: resolvePath(%s) Failure\n", __PRETTY_FUNCTION__, pFilename);
 #endif
+    free(path);
     return (-1);
   }
   memcpy(pStat, &entryFound.iNodeStat, sizeof(entryFound.iNodeStat));
+  free(path);
   return (0);
 }
 
