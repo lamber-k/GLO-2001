@@ -1,0 +1,45 @@
+
+disque.c,88
+static const char DiskName[DiskName8,180
+int ReadBlock(11,263
+int WriteBlock(31,896
+
+glofs.c,537
+#define FUSE_USE_VERSION 19,503
+int IsThisTempFileBug(31,738
+static int glofs_getattr(39,885
+const char*	fmodes[fmodes75,1981
+static int glofs_readdir(101,2794
+static int glofs_unlink(120,3282
+static int glofs_create(129,3442
+static int glofs_mkdir(140,3766
+static int glofs_link(152,4034
+static int glofs_rename(165,4457
+static int glofs_rmdir(174,4645
+static int glofs_read(186,4905
+static int glofs_truncate(205,5722
+static int glofs_write(211,5887
+static struct fuse_operations glofs_oper 224,6508
+int main(239,6896
+
+UFS.c,413
+int NumberofDirEntry(8,152
+int min(12,219
+int max(16,267
+int GetDirFromPath(26,892
+int GetFilenameFromPath(56,1735
+void printiNode(81,2506
+int bd_countfreeblocks(98,3158
+int bd_stat(102,3203
+int bd_create(106,3269
+int bd_read(110,3323
+int bd_write(114,3415
+int bd_mkdir(118,3515
+int bd_hardlink(122,3568
+int bd_unlink(126,3658
+int bd_rmdir(130,3712
+int bd_rename(134,3765
+int bd_readdir(138,3846
+
+main_ufs.c,17
+int main(17,469
