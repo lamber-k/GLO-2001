@@ -1,0 +1,29 @@
+
+disque.c,88
+static const char DiskName[DiskName8,180
+int ReadBlock(11,263
+int WriteBlock(31,896
+
+UFS.c,599
+int NumberofDirEntry(9,172
+int min(13,240
+int max(17,289
+int GetDirFromPath(27,915
+int GetFilenameFromPath(57,1791
+void printiNode(82,2577
+static inline BOOL isBlockFree(98,3217
+static int getINodeEntry(105,3449
+static int	findDirEntryByName(122,3942
+static int	resolveSection(151,4871
+static int	resolvePath(171,5580
+int	bd_countfreeblocks(208,6803
+int		bd_stat(226,7246
+int bd_create(242,7667
+int bd_read(246,7722
+int bd_write(250,7815
+int bd_mkdir(254,7916
+int bd_hardlink(258,7970
+int bd_unlink(262,8061
+int bd_rmdir(266,8116
+int bd_rename(270,8170
+int bd_readdir(274,8252

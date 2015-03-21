@@ -1,66 +1,49 @@
-NAME_UFS =	ufs
-SRCS_UFS =	main_ufs.c	\
-		UFS.c		\
-		disque.c	\
+NAME.UFS =	ufs
+NAME.GLOFS =	glofs
 
-NAME_UFS_TEST =	ufsTest
-SRCS_UFS_TEST =	mainTest.c	\
-		UFS.c		\
-		disque.c	\
+SRCS.UFS = 	main_ufs.c
+SRCS.GLOFS = 	glofs.c
 
-NAME_TEST_ETU =	TestEtudiant
-SRCS_TEST_ETU =	mainScriptTest.c	\
-		UFS.c			\
-		disque.c		\
-
-NAME_GLOFS =	glofs
-SRCS_GLOFS =	glofs.c		\
-		UFS.c		\
-		disque.c	\
-
-SRCS ?=	$(SRCS_UFS) #Default Behaviour
-NAME ?= $(NAME_UFS) #Default Behaviour
-
-
+DIR.LIBUFS =	./libUFS/
 
 F.C	     +=	-W -Wall
-F.I	     += 
-F.L	     += 
+F.I	     += -I$(DIR.LIBUFS)/include
+F.L	     += -L$(DIR.LIBUFS) -lUFS
 F.D	     +=
 
-all:	start ufs glofs
+all:	start compile_libufs $(NAME.UFS) $(NAME.GLOFS)
 
+compile_libufs:
+	$(ECHO) "Compile libUFS..."
+	@$(MAKE)  --no-print-directory -C $(DIR.LIBUFS) F.C="$(F.C)" all
+	$(ECHO) "Compile libUFS Done\n"
 
-ufs:	start
-	$(MAKE) compile SRCS="$(SRCS_UFS)" NAME="$(NAME_UFS)"
+########### ufs #############
 
+$(NAME.UFS): start
+	$(ECHO) "Compile $(NAME.UFS)..."
+	@$(MAKE) --no-print-directory SRCS="$(SRCS.UFS)" NAME="$(NAME.UFS)" compile
 
-ufsTest: start
-	$(MAKE) compile SRCS="$(SRCS_UFS_TEST)" NAME="$(NAME_UFS_TEST)"
+fclean_ufs:
+	@$(RM) $(NAME.UFS)
 
-TestEtudiant: start
-	$(MAKE) compile SRCS="$(SRCS_TEST_ETU)" NAME="$(NAME_TEST_ETU)"
+########## glofs ############
 
-glofs: start
-	$(MAKE) compile SRCS="$(SRCS_GLOFS)" NAME="$(NAME_GLOFS)" F.D="-D_FILE_OFFSET_BITS=64" F.L="-lfuse"
+$(NAME.GLOFS): start
+	$(ECHO) "Compile $(NAME.GLOFS)..."
+	@$(MAKE)  --no-print-directory SRCS="$(SRCS.GLOFS)" NAME="$(NAME.GLOFS)" F.L="$(F.L) -lfuse" F.D+="-D_FILE_OFFSET_BITS=64" compile 
 
+fclean_glofs:
+	@$(RM) $(NAME.GLOFS)
 
-clean:		clean_ufs
+########## Default rules #########
 
-clean_ufs:	SRCS := $(SRCS_UFS)
-clean_ufs: 	remove_objects
+clean:	remove_objects
+	@$(MAKE)  --no-print-directory -C $(DIR.LIBUFS) clean
 
-clean_glofs:	SRCS = $(SRCS_GLOFS)
-clean_glofs: 	remove_objects
+fclean:	fclean_ufs fclean_glofs
+	@$(MAKE)  --no-print-directory -C $(DIR.LIBUFS) fclean
 
-fclean:		fclean_ufs
-
-fclean_ufs:	NAME := $(NAME_UFS)
-fclean_ufs:	clean_ufs remove_name
-
-fclean_glofs:	NAME := $(NAME_GLOFS)
-fclean_glofs:	clean_glofs remove_name
-
-re:		fclean all
+re:	fclean all
 
 include .libmake
