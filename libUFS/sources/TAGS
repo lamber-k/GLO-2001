@@ -4,26 +4,31 @@ static const char DiskName[DiskName8,180
 int ReadBlock(11,263
 int WriteBlock(31,896
 
-UFS.c,599
-int NumberofDirEntry(9,172
-int min(13,240
-int max(17,289
-int GetDirFromPath(27,915
-int GetFilenameFromPath(57,1791
-void printiNode(82,2577
-static inline BOOL isBlockFree(98,3217
-static int getINodeEntry(105,3449
-static int	findDirEntryByName(122,3942
-static int	resolveSection(151,4871
-static int	resolvePath(171,5580
-int	bd_countfreeblocks(208,6803
-int		bd_stat(226,7246
-int bd_create(242,7667
-int bd_read(246,7722
-int bd_write(250,7815
-int bd_mkdir(254,7916
-int bd_hardlink(258,7970
-int bd_unlink(262,8061
-int bd_rmdir(266,8116
-int bd_rename(270,8170
-int bd_readdir(274,8252
+UFS.c,811
+UINT16 numberOfDirEntry(42,1722
+int min(46,1800
+int max(50,1849
+int GetDirFromPath(60,2475
+int GetFilenameFromPath(89,3338
+void printiNode(114,4124
+static inline BOOL isBlockFree(130,4764
+static inline BOOL isINodeFree(137,5002
+static inline BOOL moreBlockNeeded(144,5240
+static int	reserveBlock(198,7187
+static int clearBlock(225,7963
+static int	saveINodeEntry(248,8613
+static int getINodeEntry(272,9438
+static int	findDirEntryByName(289,9931
+static int	resolveSection(325,11097
+static int	resolvePath(345,11806
+int	bd_countfreeblocks(382,13029
+int		bd_stat(400,13472
+int		bd_create(416,13893
+int bd_read(522,17547
+int bd_write(526,17640
+int bd_mkdir(530,17741
+int bd_hardlink(534,17795
+int bd_unlink(538,17886
+int bd_rmdir(542,17941
+int bd_rename(546,17995
+int bd_readdir(550,18077

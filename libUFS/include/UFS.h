@@ -25,9 +25,13 @@
 #define FREE_BLOCK_BITMAP 2		// numero du bloc contenant le bitmap des block libres
 #define FREE_INODE_BITMAP 3		// numero du bloc contenant le bitmap des i-nodes libres
 #define BASE_BLOCK_INODE  4     // bloc de depart ou les i-nodes sont stockes sur disque
-#define DISKSIZE N_BLOCK_ON_DISK*BLOCK_SIZE // taille du disque
+#define DISKSIZE (N_BLOCK_ON_DISK*BLOCK_SIZE) // taille du disque
 #define ROOT_INODE        1     // numero du i-node correspondant au repertoire racine
 #define FILENAME_SIZE 14        // taille en caractere d'un nom de fichier, incluant le NULL
+#define BLOCK_FREE 1
+#define BLOCK_NOT_FREE 0
+#define INODE_FREE 1
+#define INODE_NOT_FREE 0
 
 typedef UINT16 ino; // type associe aux i-nodes
 
@@ -43,6 +47,8 @@ typedef UINT16 ino; // type associe aux i-nodes
 #define G_IWGRP  0002   // Permissions w pour Group
 #define G_IXGRP  0001   // Permissions x pour Group
 
+#define G_ISREG(mode) ((mode & G_IFREG) == G_IFREG)
+#define G_ISDIR(mode) ((mode & G_IFDIR) == G_IFDIR)
 
 typedef struct {
 	ino iNode;
@@ -64,6 +70,9 @@ typedef struct {
 
 #define NUM_INODE_PER_BLOCK (BLOCK_SIZE/sizeof(iNodeEntry))
 #define NUM_DIR_ENTRY_PER_BLOCK (BLOCK_SIZE/sizeof(DirEntry))
+#define MAX_ENTRIES (NUM_DIR_ENTRY_PER_BLOCK * N_BLOCK_PER_INODE)
+#define MAX_DIR_PATH_SIZE (MAX_ENTRIES * FILENAME_SIZE)
+#define MAX_ENTRIES_SIZE (MAX_ENTRIES * sizeof(DirEntry))
 
 int bd_countfreeblocks(void);
 int bd_stat(const char *pFilename, gstat *pStat);

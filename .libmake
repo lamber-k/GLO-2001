@@ -6,7 +6,7 @@
 ## Login   <barato_j@epitech.net>
 ##
 ## Started on  Fri Apr 26 18:09:49 2013 jules baratoux
-## Last update Sat Mar 21 15:29:50 2015 etu1
+## Last update Sun Mar 22 22:14:09 2015 etu1
 ##
 ## ┌───────────────────────────────────────────────────────────────────────────┐
 ## │                            MAKEFILE LIBRARY                               │
@@ -37,9 +37,16 @@ ifeq ($(INSIDE_EMACS), t)
      F.C     += -ggdb3 -O0 -Winline
      PREQ    += tags
 else
-     ES      ?= "\033[1;34m"
-     EE      ?= "\033[m"
-     F.C     += -DNDEBUG
+    ifeq ($(DEBUG), yes)
+        ES      ?= "\033[1;34m"
+        EE      ?= "\033[m"
+        F.C     += -ggdb3 -O0 -Winline
+        PREQ    += tags
+    else
+        ES      ?= "\033[1;34m"
+        EE      ?= "\033[m"
+        F.C     += -DNDEBUG
+    endif
 endif
 
 
