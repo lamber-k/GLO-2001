@@ -11,6 +11,9 @@ static inline BOOL moreBlockNeeded(const UINT16 currentSize, const UINT16 spaceN
 // Test if the block @blockNum (relative to @freeBlockBitmap) is Free
 static inline BOOL isBlockFree(const BOOL freeBlockBitmap[N_BLOCK_ON_DISK], const UINT16 blockNum);
 
+// Test if the entry in @currentINodeEntry folder named @entryName exist.
+static BOOL	entryExist(const iNodeEntry *currentINodeEntry, const char *entryName);
+
 // Get the i-Node @iNodeNum informations on @entry
 static int getINodeEntry(const UINT16 iNodeNum, iNodeEntry *entry);
 
@@ -23,16 +26,10 @@ static int resolveSection(const char *pathSection, iNodeEntry *currentINodeEntry
 // Resolve the entire path @path. Return info about it on @entryFound
 static int resolvePath(char *path, iNodeEntry *entryFound);
 
-static int createPersistence(const ino entryBlockINode,
-			     const DirEntry dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK],
-			     const iNodeEntry *newFileINodeEntry,
-			     const iNodeEntry *parentDirectoryEntry);
-
-static int createPreconditions(const char *pFilename, 
-			       char basename[FILENAME_SIZE], 
-			       char dirname[MAX_DIR_PATH_SIZE],
-			       iNodeEntry *parentDirectoryEntry,
-			       DirEntry *basenameDirEntry);
+static int directoryNewEntryPreconditions(const char *pFilename, 
+					  char basename[FILENAME_SIZE], 
+					  char dirname[MAX_DIR_PATH_SIZE],
+					  iNodeEntry *parentDirectoryEntry);
 
 // Reserve a Block on disk (call WriteBlock)
 static int reserveBlock(ino *reservedINode);
@@ -277,6 +274,12 @@ static int	findDirEntryByName(const iNodeEntry *currentINodeEntry, const char *e
   return (-1);
 }
 
+static BOOL	entryExist(const iNodeEntry *currentINodeEntry, const char *entryName) {
+  DirEntry	entryFound;
+
+  return (findDirEntryByName(currentINodeEntry, entryName, &entryFound) == 0 ? TRUE : FALSE);
+}
+
 static int	resolveSection(const char *pathSection, iNodeEntry *currentINodeEntry, DirEntry *currentDirEntry) {
   if (pathSection != NULL) {
     if (findDirEntryByName(currentINodeEntry, pathSection, currentDirEntry) == -1) {
@@ -334,11 +337,10 @@ static int	resolvePath(char *path, iNodeEntry *entryFound) {
   return (0);
 }
 
-static int	createPreconditions(const char *pFilename, 
-				    char basename[FILENAME_SIZE], 
-				    char dirname[MAX_DIR_PATH_SIZE],
-				    iNodeEntry *parentDirectoryEntry,
-				    DirEntry *basenameDirEntry) {
+static int	directoryNewEntryPreconditions(const char *pFilename, 
+					       char basename[FILENAME_SIZE], 
+					       char dirname[MAX_DIR_PATH_SIZE],
+					       iNodeEntry *parentDirectoryEntry) {
   if (GetFilenameFromPath(pFilename, basename) == 0) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: GetFilenameFromPath(%s) Failure\n", __PRETTY_FUNCTION__, pFilename);
@@ -363,7 +365,7 @@ static int	createPreconditions(const char *pFilename,
 #endif
     return (-1);
   }
-  if (findDirEntryByName(parentDirectoryEntry, basename, basenameDirEntry) == 0) {
+  if (entryExist(parentDirectoryEntry, basename) == TRUE) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: %s already exist on directory %s\n", __PRETTY_FUNCTION__, basename, dirname);
 #endif
@@ -372,57 +374,48 @@ static int	createPreconditions(const char *pFilename,
   return (0);
 }
 
-static int	createFindBlock(iNodeEntry *parentDirectoryEntry, 
-				iNodeEntry *newFileINodeEntry, 
-				ino *entryBlockINode) {
-  if (moreBlockNeeded(parentDirectoryEntry->iNodeStat.st_size, sizeof(DirEntry)) == TRUE) {
-    if (reserveBlock(entryBlockINode) == -1) {
+static int	directoryAddEntry(iNodeEntry *parentDirectory, 
+				  const char *entryName, 
+				  const ino entryINode) {
+  ino		newEntryParentBlockIndex;
+  DirEntry	dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK];
+  UINT16	entryBlockIndex;
+
+  if (moreBlockNeeded(parentDirectory->iNodeStat.st_size, sizeof(DirEntry)) == TRUE) {
+    if (reserveBlock(&newEntryParentBlockIndex) == -1) {
 #if !defined(NDEBUG)
       fprintf(stderr, "Function: %s: reserveblock() failure\n", __PRETTY_FUNCTION__);
 #endif
       return (-1);
     }
-    parentDirectoryEntry->Block[parentDirectoryEntry->iNodeStat.st_blocks] = *entryBlockINode;
-    parentDirectoryEntry->iNodeStat.st_blocks++;
+    parentDirectory->Block[parentDirectory->iNodeStat.st_blocks] = newEntryParentBlockIndex;
+    parentDirectory->iNodeStat.st_blocks++;
   }
   else {
-    *entryBlockINode = parentDirectoryEntry->Block[parentDirectoryEntry->iNodeStat.st_blocks - 1];
+    newEntryParentBlockIndex = parentDirectory->Block[parentDirectory->iNodeStat.st_blocks - 1];
   }
-  parentDirectoryEntry->iNodeStat.st_size += sizeof(DirEntry);
+  parentDirectory->iNodeStat.st_size += sizeof(DirEntry);
 
-  if (reserveBlock(&newFileINodeEntry->iNodeStat.st_ino) == -1) {
+  if (ReadBlock(newEntryParentBlockIndex, (char *)(dirEntryBlock)) == -1) {
 #if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: reserveINode() failure\n", __PRETTY_FUNCTION__);
-#endif
-    return (-1);    
-  }
-  return (0);
-}
-
-static int	createPersistence(const ino entryBlockINode,
-				  const DirEntry dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK],
-				  const iNodeEntry *newFileINodeEntry,
-				  const iNodeEntry *parentDirectoryEntry) {
-  if (WriteBlock(entryBlockINode, (const char *)(dirEntryBlock)) == -1) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: WriteBlock(%d) Failure\n", __PRETTY_FUNCTION__, entryBlockINode);
+    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, newEntryParentBlockIndex);
 #endif
     return (-1);
   }
-
-  if (saveINodeEntry(newFileINodeEntry) == -1) {
+  entryBlockIndex = (numberOfDirEntry(parentDirectory->iNodeStat.st_size) - 1) % NUM_DIR_ENTRY_PER_BLOCK;
+  strcpy(dirEntryBlock[entryBlockIndex].Filename, entryName);
+  dirEntryBlock[entryBlockIndex].iNode = entryINode;
+  if (WriteBlock(newEntryParentBlockIndex, (const char *)(dirEntryBlock)) == -1) {
 #if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__, 
-	    newFileINodeEntry->iNodeStat.st_ino);
+    fprintf(stderr, "Function: %s: WriteBlock(%d) Failure\n", __PRETTY_FUNCTION__, newEntryParentBlockIndex);
 #endif
     return (-1);
   }
-  if (saveINodeEntry(parentDirectoryEntry) == -1) {
+  if (saveINodeEntry(parentDirectory) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__, 
-	    parentDirectoryEntry->iNodeStat.st_ino);
+	    parentDirectory->iNodeStat.st_ino);
 #endif
-    clearBlock(newFileINodeEntry->iNodeStat.st_ino);
     return (-1);
   }
   return (0);
@@ -467,41 +460,43 @@ int		bd_create(const char *pFilename) {
   char		dirname[MAX_DIR_PATH_SIZE];
   iNodeEntry	parentDirectoryEntry;
   iNodeEntry	newFileINodeEntry;
-  DirEntry	basenameDirEntry;
-  ino		entryBlockINode;
-  DirEntry	dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK];
   int		preconditionStatus;
-  UINT16	entryBlockIndex;
 
-  if ((preconditionStatus = createPreconditions(pFilename, basename, dirname, 
-						&parentDirectoryEntry, &basenameDirEntry)) != 0)
+  if ((preconditionStatus = directoryNewEntryPreconditions(pFilename, basename, dirname, 
+							   &parentDirectoryEntry)) != 0) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: directoryNewEntryPreconditon(%s) failure\n", __PRETTY_FUNCTION__, pFilename);
+#endif
     return (preconditionStatus);
-
-  if (createFindBlock(&parentDirectoryEntry, &newFileINodeEntry, &entryBlockINode) == -1)
+  }
+  if (reserveBlock(&newFileINodeEntry.iNodeStat.st_ino) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: reserveINode() failure\n", __PRETTY_FUNCTION__);
+#endif
     return (-1);
-
-
+  }
   newFileINodeEntry.iNodeStat.st_mode = (G_IFREG | G_IRWXU | G_IRWXG);
   newFileINodeEntry.iNodeStat.st_nlink = 1;
   newFileINodeEntry.iNodeStat.st_size = 0;
   newFileINodeEntry.iNodeStat.st_blocks = 0;
-
-  strcpy(basenameDirEntry.Filename, basename);
-  basenameDirEntry.iNode = newFileINodeEntry.iNodeStat.st_ino;
-  memset(&dirEntryBlock, 0, sizeof(dirEntryBlock));
-
-  if (ReadBlock(entryBlockINode, (char *)(dirEntryBlock)) == -1) {
+  if (saveINodeEntry(&newFileINodeEntry) == -1) {
 #if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, entryBlockINode);
+    fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__, 
+	    newFileINodeEntry.iNodeStat.st_ino);
 #endif
+    clearBlock(newFileINodeEntry.iNodeStat.st_ino);
     return (-1);
   }
-
-  entryBlockIndex = (numberOfDirEntry(parentDirectoryEntry.iNodeStat.st_size) - 1) % NUM_DIR_ENTRY_PER_BLOCK;
-
-  memcpy(&dirEntryBlock[entryBlockIndex], &basenameDirEntry, sizeof(DirEntry));
-  
-  return (createPersistence(entryBlockINode, dirEntryBlock, &newFileINodeEntry, &parentDirectoryEntry));
+  if (directoryAddEntry(&parentDirectoryEntry, basename, newFileINodeEntry.iNodeStat.st_ino) == -1)
+  {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: directoryAddEntry(%d, %d) failure\n", __PRETTY_FUNCTION__, 
+	    parentDirectoryEntry.iNodeStat.st_ino, newFileINodeEntry.iNodeStat.st_ino);
+#endif
+    clearBlock(newFileINodeEntry.iNodeStat.st_ino);
+    return (-1);
+  }
+  return (0);
 }
 
 int bd_read(const char *pFilename, char *buffer, int offset, int numbytes) {
@@ -512,8 +507,7 @@ int bd_write(const char *pFilename, const char *buffer, int offset, int numbytes
   return -1;
 }
 
-int bd_mkdir(const char *pDirName) {
-  return -1;
+int		bd_mkdir(const char *pDirName) {
 }
 	
 int bd_hardlink(const char *pPathExistant, const char *pPathNouveauLien) {

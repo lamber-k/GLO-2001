@@ -4,34 +4,34 @@ static const char DiskName[DiskName8,180
 int ReadBlock(11,263
 int WriteBlock(31,896
 
-UFS.c,930
-UINT16 numberOfDirEntry(47,1926
-int min(51,2004
-int max(55,2053
-int GetDirFromPath(65,2679
-int GetFilenameFromPath(94,3542
-void printiNode(119,4328
-static inline BOOL isBlockFree(135,4968
-static inline BOOL isINodeFree(142,5206
-static inline BOOL moreBlockNeeded(149,5444
-static int	reserveBlock(153,5602
-static int clearBlock(180,6378
-static int	saveINodeEntry(203,7028
-static int getINodeEntry(227,7853
-static int	findDirEntryByName(244,8346
-static int	resolveSection(280,9512
-static int	resolvePath(300,10221
-static int	createPreconditions(337,11444
-static int	createFindBlock(375,12746
-static int	createPersistence(402,13694
-int	bd_countfreeblocks(431,14661
-int		bd_stat(449,15104
-int		bd_create(465,15525
-int bd_read(507,17022
-int bd_write(511,17115
-int bd_mkdir(515,17216
-int bd_hardlink(519,17270
-int bd_unlink(523,17361
-int bd_rmdir(527,17416
-int bd_rename(531,17470
-int bd_readdir(535,17552
+UFS.c,937
+UINT16 numberOfDirEntry(44,1835
+int min(48,1913
+int max(52,1962
+int GetDirFromPath(62,2588
+int GetFilenameFromPath(91,3451
+void printiNode(116,4237
+static inline BOOL isBlockFree(132,4877
+static inline BOOL isINodeFree(139,5115
+static inline BOOL moreBlockNeeded(146,5353
+static int	reserveBlock(150,5511
+static int clearBlock(177,6287
+static int	saveINodeEntry(200,6937
+static int getINodeEntry(224,7762
+static int	findDirEntryByName(241,8255
+static BOOL	entryExist(277,9421
+static int	resolveSection(283,9627
+static int	resolvePath(303,10336
+static int	directoryNewEntryPreconditions(340,11559
+static int	directoryAddEntry(377,12825
+int	bd_countfreeblocks(425,14588
+int		bd_stat(443,15031
+int		bd_create(459,15452
+int bd_read(503,17046
+int bd_write(507,17139
+int		bd_mkdir(511,17240
+int bd_hardlink(514,17282
+int bd_unlink(518,17373
+int bd_rmdir(522,17428
+int bd_rename(526,17482
+int bd_readdir(530,17564
