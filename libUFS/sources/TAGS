@@ -4,7 +4,7 @@ static const char DiskName[DiskName8,180
 int ReadBlock(11,263
 int WriteBlock(31,896
 
-UFS.c,937
+UFS.c,988
 UINT16 numberOfDirEntry(44,1835
 int min(48,1913
 int max(52,1962
@@ -23,15 +23,16 @@ static BOOL	entryExist(277,9421
 static int	resolveSection(283,9627
 static int	resolvePath(303,10336
 static int	directoryNewEntryPreconditions(340,11559
-static int	directoryAddEntry(377,12825
-int	bd_countfreeblocks(425,14588
-int		bd_stat(443,15031
-int		bd_create(459,15452
-int bd_read(503,17046
-int bd_write(507,17139
-int		bd_mkdir(511,17240
-int bd_hardlink(514,17282
-int bd_unlink(518,17373
-int bd_rmdir(522,17428
-int bd_rename(526,17482
-int bd_readdir(530,17564
+static int	directoryAddEntrySelectBlock(377,12825
+static int	directoryAddEntry(404,13843
+int	bd_countfreeblocks(448,15386
+int		bd_stat(466,15829
+int		bd_create(482,16250
+int bd_read(526,17828
+int bd_write(530,17921
+int		bd_mkdir(534,18022
+int bd_hardlink(597,20357
+int bd_unlink(601,20448
+int bd_rmdir(605,20503
+int bd_rename(609,20557
+int bd_readdir(613,20639
