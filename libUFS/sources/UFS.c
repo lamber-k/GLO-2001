@@ -32,7 +32,7 @@ static int directoryNewEntryPreconditions(const char *pFilename,
 					  iNodeEntry *parentDirectoryEntry);
 
 // Reserve a Block on disk (call WriteBlock)
-static int reserveBlock(ino *reservedINode);
+static int reserveBlock(iNodeEntry *reservedINode);
 
 // Clear a Block on disk (call WriteBlock)
 static int clearBlock(const ino iNodeToClear);
@@ -147,7 +147,7 @@ static inline BOOL moreBlockNeeded(const UINT16 currentSize, const UINT16 spaceN
   return ((currentSize % BLOCK_SIZE) + spaceNeeded > BLOCK_SIZE);
 }
 
-static int	reserveBlock(ino *reservedBlock) {
+static int	reserveBlock(iNodeEntry *reservedBlock) {
   BOOL		iNodeBitmap[BLOCK_SIZE];
   UINT16	currentBlock = 1;
 
@@ -166,7 +166,10 @@ static int	reserveBlock(ino *reservedBlock) {
 #endif
 	return (-1);
       }
-      *reservedBlock = currentBlock;
+      if (reservedBlock->iNodeStat.st_blocks == 0)
+	reservedBlock->iNodeStat.st_ino = currentBlock;
+      reservedBlock->Block[reservedBlock->iNodeStat.st_blocks] = currentBlock;
+      reservedBlock->iNodeStat.st_blocks++;
       return (0);
     }
     ++currentBlock;
@@ -378,23 +381,26 @@ static int	directoryAddEntrySelectBlock(iNodeEntry *parentDirectory,
 					     ino *newEntryParentBlockIndex,
 					     DirEntry dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK]) {
   if (moreBlockNeeded(parentDirectory->iNodeStat.st_size, sizeof(DirEntry)) == TRUE) {
-    if (reserveBlock(newEntryParentBlockIndex) == -1) {
+    if (reserveBlock(parentDirectory) == -1) {
 #if !defined(NDEBUG)
       fprintf(stderr, "Function: %s: reserveblock() failure\n", __PRETTY_FUNCTION__);
 #endif
       return (-1);
     }
-    parentDirectory->Block[parentDirectory->iNodeStat.st_blocks] = *newEntryParentBlockIndex;
-    parentDirectory->iNodeStat.st_blocks++;
   }
-  else {
-    *newEntryParentBlockIndex = parentDirectory->Block[parentDirectory->iNodeStat.st_blocks - 1];
-  }
+  *newEntryParentBlockIndex = parentDirectory->Block[parentDirectory->iNodeStat.st_blocks - 1];
   parentDirectory->iNodeStat.st_size += sizeof(DirEntry);
 
   if (ReadBlock(*newEntryParentBlockIndex, (char *)(dirEntryBlock)) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, *newEntryParentBlockIndex);
+#endif
+    return (-1);
+  }
+  if (saveINodeEntry(parentDirectory) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__, 
+	    parentDirectory->iNodeStat.st_ino);
 #endif
     return (-1);
   }
@@ -425,13 +431,6 @@ static int	directoryAddEntry(iNodeEntry *parentDirectory,
   if (WriteBlock(newEntryParentBlockIndex, (const char *)(dirEntryBlock)) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: WriteBlock(%d) Failure\n", __PRETTY_FUNCTION__, newEntryParentBlockIndex);
-#endif
-    return (-1);
-  }
-  if (saveINodeEntry(parentDirectory) == -1) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__, 
-	    parentDirectory->iNodeStat.st_ino);
 #endif
     return (-1);
   }
@@ -493,16 +492,16 @@ int		bd_create(const char *pFilename) {
 #endif
     return (preconditionStatus);
   }
-  if (reserveBlock(&newFileINodeEntry.iNodeStat.st_ino) == -1) {
+  newFileINodeEntry.iNodeStat.st_mode = (G_IFREG | G_IRWXU | G_IRWXG);
+  newFileINodeEntry.iNodeStat.st_nlink = 0;
+  newFileINodeEntry.iNodeStat.st_size = 0;
+  newFileINodeEntry.iNodeStat.st_blocks = 0;
+  if (reserveBlock(&newFileINodeEntry) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: reserveINode() failure\n", __PRETTY_FUNCTION__);
 #endif
     return (-1);
   }
-  newFileINodeEntry.iNodeStat.st_mode = (G_IFREG | G_IRWXU | G_IRWXG);
-  newFileINodeEntry.iNodeStat.st_nlink = 0;
-  newFileINodeEntry.iNodeStat.st_size = 0;
-  newFileINodeEntry.iNodeStat.st_blocks = 0;
   if (saveINodeEntry(&newFileINodeEntry) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__, 
@@ -545,17 +544,16 @@ int		bd_mkdir(const char *pDirName) {
 #endif
     return (preconditionStatus);
   }
-  if (reserveBlock(&newDirINodeEntry.iNodeStat.st_ino) == -1) {
+  newDirINodeEntry.iNodeStat.st_mode = (G_IFDIR | G_IRWXU | G_IRWXG);
+  newDirINodeEntry.iNodeStat.st_nlink = 0;
+  newDirINodeEntry.iNodeStat.st_size = 0;
+  newDirINodeEntry.iNodeStat.st_blocks = 0;
+  if (reserveBlock(&newDirINodeEntry) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: reserveINode() failure\n", __PRETTY_FUNCTION__);
 #endif
     return (-1);
   }
-  newDirINodeEntry.iNodeStat.st_mode = (G_IFDIR | G_IRWXU | G_IRWXG);
-  newDirINodeEntry.iNodeStat.st_nlink = 0;
-  newDirINodeEntry.iNodeStat.st_size = 0;
-  newDirINodeEntry.iNodeStat.st_blocks = 1;
-  newDirINodeEntry.Block[0] = newDirINodeEntry.iNodeStat.st_ino;
   if (saveINodeEntry(&newDirINodeEntry) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__, 

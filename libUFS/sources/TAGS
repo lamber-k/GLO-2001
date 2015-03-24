@@ -5,34 +5,34 @@ int ReadBlock(11,263
 int WriteBlock(31,896
 
 UFS.c,988
-UINT16 numberOfDirEntry(44,1835
-int min(48,1913
-int max(52,1962
-int GetDirFromPath(62,2588
-int GetFilenameFromPath(91,3451
-void printiNode(116,4237
-static inline BOOL isBlockFree(132,4877
-static inline BOOL isINodeFree(139,5115
-static inline BOOL moreBlockNeeded(146,5353
-static int	reserveBlock(150,5511
-static int clearBlock(177,6287
-static int	saveINodeEntry(200,6937
-static int getINodeEntry(224,7762
-static int	findDirEntryByName(241,8255
-static BOOL	entryExist(277,9421
-static int	resolveSection(283,9627
-static int	resolvePath(303,10336
-static int	directoryNewEntryPreconditions(340,11559
-static int	directoryAddEntrySelectBlock(377,12825
-static int	directoryAddEntry(404,13843
-int	bd_countfreeblocks(448,15386
-int		bd_stat(466,15829
-int		bd_create(482,16250
-int bd_read(526,17828
-int bd_write(530,17921
-int		bd_mkdir(534,18022
-int bd_hardlink(597,20357
-int bd_unlink(601,20448
-int bd_rmdir(605,20503
-int bd_rename(609,20557
-int bd_readdir(613,20639
+UINT16 numberOfDirEntry(44,1842
+int min(48,1920
+int max(52,1969
+int GetDirFromPath(62,2595
+int GetFilenameFromPath(91,3458
+void printiNode(116,4244
+static inline BOOL isBlockFree(132,4884
+static inline BOOL isINodeFree(139,5122
+static inline BOOL moreBlockNeeded(146,5360
+static int	reserveBlock(150,5518
+static int clearBlock(180,6487
+static int	saveINodeEntry(203,7137
+static int getINodeEntry(227,7962
+static int	findDirEntryByName(244,8455
+static BOOL	entryExist(280,9621
+static int	resolveSection(286,9827
+static int	resolvePath(306,10536
+static int	directoryNewEntryPreconditions(343,11759
+static int	directoryAddEntrySelectBlock(380,13025
+static int	directoryAddEntry(410,14106
+int	bd_countfreeblocks(447,15424
+int		bd_stat(465,15867
+int		bd_create(481,16288
+int bd_read(525,17849
+int bd_write(529,17942
+int		bd_mkdir(533,18043
+int bd_hardlink(595,20296
+int bd_unlink(599,20387
+int bd_rmdir(603,20442
+int bd_rename(607,20496
+int bd_readdir(611,20578
