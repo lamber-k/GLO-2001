@@ -10,9 +10,9 @@ static int addBlock(iNodeEntry *fileEntry)
 
 	if (fileEntry->iNodeStat.st_blocks == N_BLOCK_PER_INODE) {
 #if !defined(NDEBUG)
-		fprintf(stderr, "Function: %s: size limit is reached", __PRETTY_FUNCTION__);
+		fprintf(stderr, "Function: %s: write is beyond the capacity of the file system", __PRETTY_FUNCTION__);
 #endif
-		return -1;
+		return -4;
 	}
 	if (ReadBlock(FREE_BLOCK_BITMAP, (char *)blockBitmap) == -1) {
 #if !defined(NDEBUG)
@@ -65,6 +65,7 @@ static int _write_data(iNodeEntry *fileEntry, const char *buffer, int offset, in
 	int numbytes_write = 0;
 	char writeBuffer[BLOCK_SIZE];
 	char isNewBlock = 0;
+	int error;
 
 	if (fileEntry->iNodeStat.st_blocks != 0 && (currentBlockPosition = _find_block_by_offset(fileEntry, offset)) == -1) {
 		return -1;
@@ -73,11 +74,11 @@ static int _write_data(iNodeEntry *fileEntry, const char *buffer, int offset, in
 	while (numbytes_write != numbytes) {
 		isNewBlock = 0;
 		if (BLOCK_SIZE * fileEntry->iNodeStat.st_blocks == fileEntry->iNodeStat.st_size) {
-			if (addBlock(fileEntry) == -1) {
+			if ((error = addBlock(fileEntry)) == -1) {
 #if !defined(NDEBUG)
 				fprintf(stderr, "Function: %s: cannot add block to current file\n", __PRETTY_FUNCTION__);
 #endif
-				return -1;
+				return error;
 			}
 			++currentBlockPosition;
 			isNewBlock = 1;
@@ -135,7 +136,13 @@ int _bd_write(const char *pFilename, const char *buffer, int offset, int numbyte
 #if defined(NDEBUG)
 		fprintf(stderr, "Function: %s: %s is a directory", __PRETTY_FUNCTION__, path);
 #endif
-		return -1;
+		return -2;
+	}
+	if (offset >= fileEntry.iNodeStat.st_size) {
+#if defined(NDEBUG)
+		fprintf(stderr, "Function: %s: offset: %d is out of range", __PRETTY_FUNCTION__, offset);
+#endif
+		return -3;
 	}
 	return _write_data(&fileEntry, buffer, offset, numbytes);
 }
@@ -192,13 +199,13 @@ int _bd_read(const char *pFilename, char *buffer, int offset, int numbytes)
 #if defined(NDEBUG)
 		fprintf(stderr, "Function: %s: %s is a directory", __PRETTY_FUNCTION__, path);
 #endif
-		return -1;
+		return -2;
 	}
 	if (offset >= fileEntry.iNodeStat.st_size) {
 #if defined(NDEBUG)
 		fprintf(stderr, "Function: %s: offset: %d is out of range", __PRETTY_FUNCTION__, offset);
 #endif
-		return -1;
+		return -3;
 	}
 	return _read_data(&fileEntry, buffer, offset, (offset + numbytes > fileEntry.iNodeStat.st_size ? fileEntry.iNodeStat.st_size - offset : numbytes));
 }
