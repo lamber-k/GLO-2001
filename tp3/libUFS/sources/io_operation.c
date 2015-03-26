@@ -157,7 +157,6 @@ static int _read_data(iNodeEntry *fileEntry, char *buffer, int offset, int numby
 		if ((currentBlockPosition = _find_block_by_offset(fileEntry, offset)) == -1) {
 			return -1;
 		}
-		printf("block position : %d\n", currentBlockPosition);
 		if (ReadBlock(fileEntry->Block[currentBlockPosition], readBuffer) == -1) {
 #if !defined(NDEBUG)
 			fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, fileEntry->Block[currentBlockPosition]);
@@ -166,7 +165,6 @@ static int _read_data(iNodeEntry *fileEntry, char *buffer, int offset, int numby
 		}
 		int localOffset = offset % BLOCK_SIZE;
 		int readSize = (numbytes - numbytes_read > BLOCK_SIZE ? BLOCK_SIZE - localOffset : numbytes - numbytes_read);
-		printf("%d\n", readSize);
 		memcpy(buffer + numbytes_read,
 		       readBuffer + localOffset,
 		       readSize);
