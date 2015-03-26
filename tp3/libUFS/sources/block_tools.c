@@ -36,7 +36,24 @@ int addBlock(iNodeEntry *fileEntry)
 	return -1;
 }
 
-int freeBlock(iNodeEntry *fileEntry)
+int freeBlock(iNodeEntry *fileEntry, int number)
 {
-	return -1;
+	BOOL	blockBitmap[BLOCK_SIZE];
+
+	if (number > fileEntry->iNodeStat.st_blocks) {
+		return -1;
+	}
+	if (ReadBlock(FREE_BLOCK_BITMAP, (char *)blockBitmap) == -1) {
+#if !defined(NDEBUG)
+		fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, FREE_BLOCK_BITMAP);
+#endif
+		return -1;
+	}
+	while (number != 0) {
+		blockBitmap[fileEntry->Block[fileEntry->iNodeStat.st_blocks - 1]] = BLOCK_FREE;
+		--(fileEntry->iNodeStat.st_blocks);
+		--number;
+	}
+	fileEntry->iNodeStat.st_size = (BLOCK_SIZE * fileEntry->iNodeStat.st_blocks);
+	return 0;
 }

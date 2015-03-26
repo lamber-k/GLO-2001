@@ -150,7 +150,15 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 		RetVal =  bd_write(argv[2],argv[3],atoi(argv[4]),strlen(argv[3]));
-	} /* ========== commande bd_chmod() ============= Non applicable en 2015
+	} // ========== commande truncate() =============
+	else if (strcmp(argv[1], "truncate") == 0) {
+		if (argc!=4) { 
+			printf("La commande truncate demande 2 arguments!\n");
+			printf("   ufs truncate nom_fichier offset\n");
+			return 1;
+		}
+		RetVal =  bd_truncate(argv[2], atoi(argv[3]));		
+	}	/* ========== commande bd_chmod() ============= Non applicable en 2015
 	else if (strcmp(argv[1],"chmod")==0) {
 		if (argc!=4) { 
 			printf("La commande chmod demande 2 arguments!\n");

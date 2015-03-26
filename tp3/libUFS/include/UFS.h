@@ -86,6 +86,7 @@ int bd_unlink(const char *pFilename);
 int bd_rmdir(const char *pDirName);
 int bd_rename(const char *pFilename, const char *pDest);
 int bd_readdir(const char *pDirLocation, DirEntry **ppListeFichiers);
+int bd_truncate(const char *pFilename, int offset);
 
 typedef unsigned char BOOL;
 

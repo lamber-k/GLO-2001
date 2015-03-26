@@ -203,8 +203,9 @@ static int glofs_read(const char *pFilename, char *buffer, size_t numbytes, off_
 
 // placeholder qui ne fait rien, pour permettre d'utiliser gedit, nano, etc avec notre système de fichier.
 static int glofs_truncate(const char *pFilename, off_t offset) {
-	printf("truncate(%s,%jd) appelé, mais non-implémenté.\n",pFilename,offset);
-	return offset;
+	printf("truncate(%s,%jd) appelé.\n",pFilename, offset);
+	int RetCode = bd_truncate(pFilename, offset);
+	return RetCode;
 }
 
 

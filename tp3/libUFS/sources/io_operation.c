@@ -20,6 +20,39 @@ static int _find_block_by_offset(iNodeEntry *fileEntry, int offset)
 	return position;
 }
 
+static int _file_controle(iNodeEntry *fileEntry, const char *pFilename, int offset)
+{
+	char *path = strdup(pFilename);
+
+	if (path == NULL) {
+#if defined(NDEBUG)
+		fprintf(stderr, "Function: %s: strdup failure", __PRETTY_FUNCTION__);
+#endif
+		return -1;
+	}
+	if (resolvePath(path, fileEntry) == -1) {
+		free(path);
+#if defined(NDEBUG)
+		fprintf(stderr, "Function: %s: resolvePath(%s) failure", __PRETTY_FUNCTION__, path);
+#endif
+		return -1;
+	}
+	free(path);
+	if (G_ISDIR(fileEntry->iNodeStat.st_mode)) {
+#if defined(NDEBUG)
+		fprintf(stderr, "Function: %s: %s is a directory", __PRETTY_FUNCTION__, path);
+#endif
+		return -2;
+	}
+	if (offset > fileEntry->iNodeStat.st_size) {
+#if defined(NDEBUG)
+		fprintf(stderr, "Function: %s: offset: %d is out of range", __PRETTY_FUNCTION__, offset);
+#endif
+		return -3;
+	}
+	return 0;
+}
+
 static int _write_data(iNodeEntry *fileEntry, const char *buffer, int offset, int numbytes)
 {
 	int currentBlockPosition = -1;
@@ -77,33 +110,9 @@ static int _write_data(iNodeEntry *fileEntry, const char *buffer, int offset, in
 int _bd_write(const char *pFilename, const char *buffer, int offset, int numbytes)
 {
 	iNodeEntry fileEntry;
-	char *path = strdup(pFilename);
-
-	if (path == NULL) {
-#if defined(NDEBUG)
-		fprintf(stderr, "Function: %s: strdup failure", __PRETTY_FUNCTION__);
-#endif
-		return -1;
-	}
-	if (resolvePath(path, &fileEntry) == -1) {
-		free(path);
-#if defined(NDEBUG)
-		fprintf(stderr, "Function: %s: resolvePath(%s) failure", __PRETTY_FUNCTION__, path);
-#endif
-		return -1;
-	}
-	free(path);
-	if (G_ISDIR(fileEntry.iNodeStat.st_mode)) {
-#if defined(NDEBUG)
-		fprintf(stderr, "Function: %s: %s is a directory", __PRETTY_FUNCTION__, path);
-#endif
-		return -2;
-	}
-	if (offset >= fileEntry.iNodeStat.st_size) {
-#if defined(NDEBUG)
-		fprintf(stderr, "Function: %s: offset: %d is out of range", __PRETTY_FUNCTION__, offset);
-#endif
-		return -3;
+	int error;
+	if ((error = _file_controle(&fileEntry, pFilename, offset)) == -1) {
+		return error;
 	}
 	return _write_data(&fileEntry, buffer, offset, numbytes);
 }
@@ -138,33 +147,28 @@ static int _read_data(iNodeEntry *fileEntry, char *buffer, int offset, int numby
 int _bd_read(const char *pFilename, char *buffer, int offset, int numbytes)
 {
 	iNodeEntry fileEntry;
-	char *path = strdup(pFilename);
-
-	if (path == NULL) {
-#if defined(NDEBUG)
-		fprintf(stderr, "Function: %s: strdup failure", __PRETTY_FUNCTION__);
-#endif
-		return -1;
-	}
-	if (resolvePath(path, &fileEntry) == -1) {
-		free(path);
-#if defined(NDEBUG)
-		fprintf(stderr, "Function: %s: resolvePath(%s) failure", __PRETTY_FUNCTION__, path);
-#endif
-		return -1;
-	}
-	free(path);
-	if (G_ISDIR(fileEntry.iNodeStat.st_mode)) {
-#if defined(NDEBUG)
-		fprintf(stderr, "Function: %s: %s is a directory", __PRETTY_FUNCTION__, path);
-#endif
-		return -2;
-	}
-	if (offset >= fileEntry.iNodeStat.st_size) {
-#if defined(NDEBUG)
-		fprintf(stderr, "Function: %s: offset: %d is out of range", __PRETTY_FUNCTION__, offset);
-#endif
-		return -3;
+	int error;
+	if ((error = _file_controle(&fileEntry, pFilename, offset)) == -1) {
+		return error;
 	}
 	return _read_data(&fileEntry, buffer, offset, (offset + numbytes > fileEntry.iNodeStat.st_size ? fileEntry.iNodeStat.st_size - offset : numbytes));
+}
+
+int _bd_truncate(const char *pFilename, int offset)
+{
+	iNodeEntry fileEntry;
+	int error;
+	if ((error = _file_controle(&fileEntry, pFilename, offset)) == -1) {
+		return error;
+	}
+	int numberOfReleaseBlock = (fileEntry.iNodeStat.st_size - offset) / BLOCK_SIZE;
+	printf("number : %d\n", numberOfReleaseBlock);
+	if (numberOfReleaseBlock != 0 && freeBlock(&fileEntry, numberOfReleaseBlock) == -1) {
+		return -1;
+	}
+	fileEntry.iNodeStat.st_size -= (fileEntry.iNodeStat.st_size - offset) - (numberOfReleaseBlock * BLOCK_SIZE);
+	if (saveINodeEntry(&fileEntry) == -1) {
+		return -1;
+	}
+	return 0;
 }
