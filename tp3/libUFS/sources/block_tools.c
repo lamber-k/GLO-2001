@@ -1,8 +1,8 @@
-#include <stdio.h>
-#include "block_tools.h"
-#include "disque.h"
+#include	<stdio.h>
+#include	"block_tools.h"
+#include	"disque.h"
 
-int addBlock(iNodeEntry *fileEntry)
+int			addBlock(iNodeEntry *fileEntry)
 {
 	bool_t	blockBitmap[BLOCK_SIZE];
 	UINT16	current = BASE_BLOCK;
@@ -37,7 +37,8 @@ int addBlock(iNodeEntry *fileEntry)
 	return -1;
 }
 
-int freeBlock(iNodeEntry *fileEntry, int number)
+int			freeBlock(iNodeEntry *fileEntry,
+                      int number)
 {
 	bool_t	blockBitmap[BLOCK_SIZE];
 

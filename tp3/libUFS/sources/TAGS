@@ -33,9 +33,9 @@ int bd_rmdir(185,5554
 int bd_rename(190,5608
 int bd_readdir(195,5690
 
-block_tools.c,42
-int addBlock(5,65
-int freeBlock(40,1075
+block_tools.c,46
+int			addBlock(5,65
+int			freeBlock(40,1077
 
 path.c,173
 int	findDirEntryByName(9,143
@@ -45,14 +45,14 @@ int	resolvePath(71,2205
 int GetDirFromPath(114,3998
 int GetFilenameFromPath(143,4862
 
-io_operation.c,212
-static int _find_block_by_offset(9,147
-static int _file_controle(25,541
-static int _write_data(58,1362
-int _bd_write(112,3075
-static int _read_data(122,3346
-int _bd_read(149,4217
-int _bd_truncate(159,4571
+io_operation.c,225
+static int		_find_block_by_offset(9,147
+static int		_file_controle(26,582
+static int		_write_data(61,1467
+int				_bd_write(117,3274
+static int		_read_data(130,3628
+int				_bd_read(160,4588
+int				_bd_truncate(173,5022
 
 inode_tools.c,139
 inline bool_t isINodeFree(3,26
