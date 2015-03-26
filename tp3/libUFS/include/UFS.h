@@ -88,7 +88,7 @@ int bd_rename(const char *pFilename, const char *pDest);
 int bd_readdir(const char *pDirLocation, DirEntry **ppListeFichiers);
 int bd_truncate(const char *pFilename, int offset);
 
-typedef unsigned char BOOL;
+typedef unsigned char bool_t;
 
 #define TRUE 1
 #define FALSE (!(TRUE))

@@ -13,9 +13,9 @@ static int glofs_rename(165,4457
 static int glofs_rmdir(174,4645
 static int glofs_read(186,4905
 static int glofs_truncate(205,5722
-static int glofs_write(211,5887
-static struct fuse_operations glofs_oper 224,6508
-int main(239,6896
+static int glofs_write(212,5913
+static struct fuse_operations glofs_oper 225,6534
+int main(240,6922
 
 main_ufs.c,17
 int main(17,469

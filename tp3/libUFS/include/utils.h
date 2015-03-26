@@ -5,13 +5,13 @@
 #include "UFS.h"
 
 // Test if another block(s) are needed for @spaceNumber octets in @currentSize
-inline BOOL moreBlockNeeded(const UINT16 currentSize, const UINT16 spaceNeeded);
+inline bool_t moreBlockNeeded(const UINT16 currentSize, const UINT16 spaceNeeded);
 
 // Test if the block @blockNum (relative to @freeBlockBitmap) is Free
-inline BOOL isBlockFree(const BOOL freeBlockBitmap[N_BLOCK_ON_DISK], const UINT16 blockNum);
+inline bool_t isBlockFree(const bool_t freeBlockBitmap[N_BLOCK_ON_DISK], const UINT16 blockNum);
 
 // Test if the entry in @currentINodeEntry folder named @entryName exist.
-BOOL	entryExist(const iNodeEntry *currentINodeEntry, const char *entryName);
+bool_t	entryExist(const iNodeEntry *currentINodeEntry, const char *entryName);
 
 // Get the i-Node @iNodeNum informations on @entry
 int getINodeEntry(const UINT16 iNodeNum, iNodeEntry *entry);
@@ -31,10 +31,16 @@ int directoryNewEntryPreconditions(const char *pFilename,
 					  iNodeEntry *parentDirectoryEntry);
 
 // Reserve a Block on disk (call WriteBlock)
-int reserveBlock(iNodeEntry *reservedINode);
+int reserveBlock(iNodeEntry *reservedINodeEntry);
 
 // Clear a Block on disk (call WriteBlock)
-int clearBlock(const ino iNodeToClear);
+int clearBlock(const ino blockToClear, iNodeEntry *INodeEntry);
+
+// Reserve an iNode on disk (call WriteBlock)
+int reserveINode(iNodeEntry *reservedINode);
+
+// Clear an iNode on disk (call WriteBlock)
+int clearINode(const ino iNodeToClear);
 
 // Save @toSave entry (call WriteBlock)
 int saveINodeEntry(const iNodeEntry *toSave);

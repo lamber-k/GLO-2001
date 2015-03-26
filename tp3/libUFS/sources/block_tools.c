@@ -1,9 +1,10 @@
+#include <stdio.h>
 #include "block_tools.h"
 #include "disque.h"
 
 int addBlock(iNodeEntry *fileEntry)
 {
-	BOOL	blockBitmap[BLOCK_SIZE];
+	bool_t	blockBitmap[BLOCK_SIZE];
 	UINT16	current = BASE_BLOCK;
 
 	if (fileEntry->iNodeStat.st_blocks == N_BLOCK_PER_INODE) {
@@ -38,7 +39,7 @@ int addBlock(iNodeEntry *fileEntry)
 
 int freeBlock(iNodeEntry *fileEntry, int number)
 {
-	BOOL	blockBitmap[BLOCK_SIZE];
+	bool_t	blockBitmap[BLOCK_SIZE];
 
 	if (number > fileEntry->iNodeStat.st_blocks) {
 		return -1;

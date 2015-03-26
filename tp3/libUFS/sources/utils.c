@@ -1,28 +1,80 @@
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include "utils.h"
 #include "disque.h"
 
-inline BOOL isBlockFree(const BOOL freeBlockBitmap[N_BLOCK_ON_DISK], const UINT16 blockNum) {
+inline bool_t isBlockFree(const bool_t freeBlockBitmap[N_BLOCK_ON_DISK], const UINT16 blockNum) {
 #if !defined(NDEBUG)
   assert(blockNum > 0 && blockNum < N_BLOCK_ON_DISK);
 #endif
   return (freeBlockBitmap[blockNum] == BLOCK_FREE);
 }
 
-inline BOOL isINodeFree(const BOOL freeINodeBitmap[N_INODE_ON_DISK], const UINT16 blockNum) {
+inline bool_t isINodeFree(const bool_t freeINodeBitmap[N_INODE_ON_DISK], const UINT16 inodeNum) {
 #if !defined(NDEBUG)
-  assert(blockNum > 0 && blockNum < N_INODE_ON_DISK);
+  assert(inodeNum > 0 && inodeNum < N_INODE_ON_DISK);
 #endif
-  return (freeINodeBitmap[blockNum] == INODE_FREE);
+  return (freeINodeBitmap[inodeNum] == INODE_FREE);
 }
 
-inline BOOL moreBlockNeeded(const UINT16 currentSize, const UINT16 spaceNeeded) {
-  return ((currentSize % BLOCK_SIZE) + spaceNeeded > BLOCK_SIZE);
+inline bool_t moreBlockNeeded(const UINT16 currentSize, const UINT16 spaceNeeded) {
+  return (currentSize == 0 || (currentSize % BLOCK_SIZE) + spaceNeeded > BLOCK_SIZE);
 }
 
-int	reserveBlock(iNodeEntry *reservedBlock) {
-  BOOL		iNodeBitmap[BLOCK_SIZE];
+
+int		reserveINode(iNodeEntry *reservedINode) {
+  bool_t	iNodeBitmap[BLOCK_SIZE];
+  UINT16	currentINode = 1;
+
+  if (ReadBlock(FREE_INODE_BITMAP, (char *)(iNodeBitmap)) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, FREE_INODE_BITMAP);
+#endif
+    return (-1);
+  }
+  while (currentINode < N_INODE_ON_DISK) {
+    if (isINodeFree(iNodeBitmap, currentINode)) {
+      iNodeBitmap[currentINode] = INODE_NOT_FREE;
+      if (WriteBlock(FREE_INODE_BITMAP, (const char *)(iNodeBitmap)) == -1) {
+#if !defined(NDEBUG)
+	fprintf(stderr, "Function: %s: WriteBlock Failure\n", __PRETTY_FUNCTION__);
+#endif
+	return (-1);
+      }
+      reservedINode->iNodeStat.st_ino = currentINode;
+      return (0);
+    }
+    ++currentINode;
+  }
+  return (-1);
+}
+
+int		clearINode(const ino iNodeToClear) {
+  bool_t	blockBitmap[BLOCK_SIZE];
+
+  if (ReadBlock(FREE_INODE_BITMAP, (char *)(blockBitmap)) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, FREE_INODE_BITMAP);
+#endif
+    return (-1);
+  }
+
+#if !defined(NDEBUG)
+  assert(isINodeFree(blockBitmap, iNodeToClear) == FALSE);
+#endif
+  blockBitmap[iNodeToClear] = INODE_FREE;
+  if (WriteBlock(FREE_INODE_BITMAP, (const char *)(blockBitmap)) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: WriteBlock Failure\n", __PRETTY_FUNCTION__);
+#endif
+    return (-1);
+  }
+  return (0);
+}
+
+int		reserveBlock(iNodeEntry *reservedBlock) {
+  bool_t	iNodeBitmap[BLOCK_SIZE];
   UINT16	currentBlock = 1;
 
   if (ReadBlock(FREE_INODE_BITMAP, (char *)(iNodeBitmap)) == -1) {
@@ -40,8 +92,6 @@ int	reserveBlock(iNodeEntry *reservedBlock) {
 #endif
 	return (-1);
       }
-      if (reservedBlock->iNodeStat.st_blocks == 0)
-		reservedBlock->iNodeStat.st_ino = currentBlock;
       reservedBlock->Block[reservedBlock->iNodeStat.st_blocks] = currentBlock;
       reservedBlock->iNodeStat.st_blocks++;
       return (0);
@@ -51,9 +101,47 @@ int	reserveBlock(iNodeEntry *reservedBlock) {
   return (-1);
 }
 
-int clearBlock(const ino blockToClear) {
-  BOOL		blockBitmap[BLOCK_SIZE];
+static int	iNodeFindBlockPos(const iNodeEntry *iNodeEntry, const ino numBlock) {
+  UINT16	i = 0;
 
+  while (i < N_BLOCK_PER_INODE && i < iNodeEntry->iNodeStat.st_blocks) {
+    if (iNodeEntry->Block[i] == numBlock) {
+      return (i);
+    }
+    ++i;
+  }
+  return (-1);
+}
+
+static int	iNodeDeleteBlock(iNodeEntry *iNodeEntry, const ino numBlock) {
+  int		iNodeBlockPos;
+  UINT16	i;
+
+  if ((iNodeBlockPos = iNodeFindBlockPos(iNodeEntry, numBlock)) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: iNodeFindBlockPos() Failure\n", __PRETTY_FUNCTION__);
+#endif
+    return (-1);
+  }
+  i = iNodeBlockPos;
+  while (i < (iNodeEntry->iNodeStat.st_blocks - 1)) {
+    iNodeEntry->Block[i] = iNodeEntry->Block[i + 1];
+    ++i;
+  }
+  iNodeEntry->iNodeStat.st_blocks--;
+  return (0);
+}
+
+int		clearBlock(const ino blockToClear, iNodeEntry *iNodeEntry) {
+  bool_t	blockBitmap[BLOCK_SIZE];
+  int		iNodeBlockPos;
+
+  if ((iNodeBlockPos = iNodeFindBlockPos(iNodeEntry, blockToClear)) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: iNodeFindBlockPos() Failure\n", __PRETTY_FUNCTION__);
+#endif
+    return (-1);
+  }
   if (ReadBlock(FREE_INODE_BITMAP, (char *)(blockBitmap)) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, FREE_INODE_BITMAP);
@@ -65,6 +153,12 @@ int clearBlock(const ino blockToClear) {
   assert(isBlockFree(blockBitmap, blockToClear) == FALSE);
 #endif
   blockBitmap[blockToClear] = INODE_FREE;
+  if (iNodeDeleteBlock(iNodeEntry, blockToClear) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: iNodeDeleteBlock(%d) Failure\n", __PRETTY_FUNCTION__, blockToClear);
+#endif
+    return (-1);
+  }
   if (WriteBlock(FREE_INODE_BITMAP, (const char *)(blockBitmap)) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: WriteBlock Failure\n", __PRETTY_FUNCTION__);
@@ -74,7 +168,7 @@ int clearBlock(const ino blockToClear) {
   return (0);
 }
 
-int	saveINodeEntry(const iNodeEntry *toSave) {
+int		saveINodeEntry(const iNodeEntry *toSave) {
   const ino	iNodeEntryBlockIndex = INODE_BLOCK(toSave->iNodeStat.st_ino);
   const UINT16	iNodeEntriesIndex = INODE_IDX_ON_BLOCK(toSave->iNodeStat.st_ino);
   iNodeEntry	iNodeEntriesBlock[NUM_INODE_PER_BLOCK];
@@ -151,7 +245,7 @@ int	findDirEntryByName(const iNodeEntry *currentINodeEntry, const char *entryNam
   return (-1);
 }
 
-BOOL	entryExist(const iNodeEntry *currentINodeEntry, const char *entryName) {
+bool_t	entryExist(const iNodeEntry *currentINodeEntry, const char *entryName) {
   DirEntry	entryFound;
 
   return (findDirEntryByName(currentINodeEntry, entryName, &entryFound) == 0 ? TRUE : FALSE);
@@ -215,9 +309,9 @@ int	resolvePath(char *path, iNodeEntry *entryFound) {
 }
 
 int	directoryNewEntryPreconditions(const char *pFilename, 
-					       char basename[FILENAME_SIZE], 
-					       char dirname[MAX_DIR_PATH_SIZE],
-					       iNodeEntry *parentDirectoryEntry) {
+				       char basename[FILENAME_SIZE], 
+				       char dirname[MAX_DIR_PATH_SIZE],
+				       iNodeEntry *parentDirectoryEntry) {
   if (GetFilenameFromPath(pFilename, basename) == 0) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: GetFilenameFromPath(%s) Failure\n", __PRETTY_FUNCTION__, pFilename);
@@ -252,8 +346,8 @@ int	directoryNewEntryPreconditions(const char *pFilename,
 }
 
 int	directoryAddEntrySelectBlock(iNodeEntry *parentDirectory,
-					     ino *newEntryParentBlockIndex,
-					     DirEntry dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK]) {
+				     ino *newEntryParentBlockIndex,
+				     DirEntry dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK]) {
   if (moreBlockNeeded(parentDirectory->iNodeStat.st_size, sizeof(DirEntry)) == TRUE) {
     if (reserveBlock(parentDirectory) == -1) {
 #if !defined(NDEBUG)
@@ -282,8 +376,8 @@ int	directoryAddEntrySelectBlock(iNodeEntry *parentDirectory,
 }
 
 int	directoryAddEntry(iNodeEntry *parentDirectory, 
-				  iNodeEntry *newEntry,
-				  const char *newEntryName) {
+			  iNodeEntry *newEntry,
+			  const char *newEntryName) {
   ino		newEntryParentBlockIndex;
   DirEntry	dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK];
   UINT16	entryBlockIndex;
