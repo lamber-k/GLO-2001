@@ -1,16 +1,17 @@
-#include <string.h>
-#include <stdio.h>
-#include "utils.h"
-#include "disque.h"
-#include "block_tools.h"
-#include "path.h"
+#include		<string.h>
+#include		<stdio.h>
+#include		"utils.h"
+#include		"disque.h"
+#include		"block_tools.h"
+#include		"path.h"
 
-static int _find_block_by_offset(iNodeEntry *fileEntry, int offset)
+static int		_find_block_by_offset(iNodeEntry *fileEntry,
+                                      int offset)
 {
 	if (offset > fileEntry->iNodeStat.st_size) {
 		offset = fileEntry->iNodeStat.st_size;
 	}
-	int position = offset / BLOCK_SIZE;
+	int			position = offset / BLOCK_SIZE;
 
 	if (position > N_BLOCK_PER_INODE) {
 #if !defined(NDEBUG)
@@ -21,9 +22,11 @@ static int _find_block_by_offset(iNodeEntry *fileEntry, int offset)
 	return position;
 }
 
-static int _file_controle(iNodeEntry *fileEntry, const char *pFilename, int offset)
+static int		_file_controle(iNodeEntry *fileEntry,
+                               const char *pFilename,
+                               int offset)
 {
-	char *path = strdup(pFilename);
+	char		*path = strdup(pFilename);
 
 	if (path == NULL) {
 #if defined(NDEBUG)
@@ -54,13 +57,16 @@ static int _file_controle(iNodeEntry *fileEntry, const char *pFilename, int offs
 	return 0;
 }
 
-static int _write_data(iNodeEntry *fileEntry, const char *buffer, int offset, int numbytes)
+static int		_write_data(iNodeEntry *fileEntry,
+                            const char *buffer,
+                            int offset,
+                            int numbytes)
 {
-	int currentBlockPosition = -1;
-	int numbytes_write = 0;
-	char writeBuffer[BLOCK_SIZE];
-	char isNewBlock = 0;
-	int error;
+	int			currentBlockPosition = -1;
+	int			numbytes_write = 0;
+	char		writeBuffer[BLOCK_SIZE];
+	char		isNewBlock = 0;
+	int			error;
 
 	if (fileEntry->iNodeStat.st_blocks != 0 && (currentBlockPosition = _find_block_by_offset(fileEntry, offset)) == -1) {
 		return -1;
@@ -78,8 +84,8 @@ static int _write_data(iNodeEntry *fileEntry, const char *buffer, int offset, in
 			++currentBlockPosition;
 			isNewBlock = 1;
 		}
-		int localOffset = offset % BLOCK_SIZE;
-		int writeSize = numbytes - numbytes_write > BLOCK_SIZE ? BLOCK_SIZE - localOffset : numbytes - numbytes_write;
+		int		localOffset = offset % BLOCK_SIZE;
+		int		writeSize = numbytes - numbytes_write > BLOCK_SIZE ? BLOCK_SIZE - localOffset : numbytes - numbytes_write;
 		if (!isNewBlock) {
 			if (ReadBlock(fileEntry->Block[currentBlockPosition], writeBuffer) == -1) {
 #if !defined(NDEBUG)
@@ -87,7 +93,6 @@ static int _write_data(iNodeEntry *fileEntry, const char *buffer, int offset, in
 #endif
 				return -1;
 			}
-
 		}
 		memcpy(writeBuffer + localOffset,
 		       buffer + numbytes_write,
@@ -108,21 +113,27 @@ static int _write_data(iNodeEntry *fileEntry, const char *buffer, int offset, in
 	return numbytes;
 }
 
-int _bd_write(const char *pFilename, const char *buffer, int offset, int numbytes)
+int				_bd_write(const char *pFilename,
+                          const char *buffer,
+                          int offset,
+                          int numbytes)
 {
-	iNodeEntry fileEntry;
-	int error;
+	iNodeEntry	fileEntry;
+	int			error;
 	if ((error = _file_controle(&fileEntry, pFilename, offset)) == -1) {
 		return error;
 	}
 	return _write_data(&fileEntry, buffer, offset, numbytes);
 }
 
-static int _read_data(iNodeEntry *fileEntry, char *buffer, int offset, int numbytes)
+static int		_read_data(iNodeEntry *fileEntry,
+                           char *buffer,
+                           int offset,
+                           int numbytes)
 {
-	char readBuffer[BLOCK_SIZE];
-	int currentBlockPosition;
-	int numbytes_read = 0;
+	char		readBuffer[BLOCK_SIZE];
+	int			currentBlockPosition;
+	int			numbytes_read = 0;
 
 	while (numbytes_read != numbytes) {
 		if ((currentBlockPosition = _find_block_by_offset(fileEntry, offset)) == -1) {
@@ -134,8 +145,8 @@ static int _read_data(iNodeEntry *fileEntry, char *buffer, int offset, int numby
 #endif
 			return -1;
 		}
-		int localOffset = offset % BLOCK_SIZE;
-		int readSize = (numbytes - numbytes_read > BLOCK_SIZE ? BLOCK_SIZE - localOffset : numbytes - numbytes_read);
+		int		localOffset = offset % BLOCK_SIZE;
+		int		readSize = (numbytes - numbytes_read > BLOCK_SIZE ? BLOCK_SIZE - localOffset : numbytes - numbytes_read);
 		memcpy(buffer + numbytes_read,
 		       readBuffer + localOffset,
 		       readSize);
@@ -145,20 +156,24 @@ static int _read_data(iNodeEntry *fileEntry, char *buffer, int offset, int numby
 	return numbytes_read;
 }
 
-int _bd_read(const char *pFilename, char *buffer, int offset, int numbytes)
+int				_bd_read(const char *pFilename,
+                         char *buffer,
+                         int offset,
+                         int numbytes)
 {
-	iNodeEntry fileEntry;
-	int error;
+	iNodeEntry	fileEntry;
+	int			error;
 	if ((error = _file_controle(&fileEntry, pFilename, offset)) == -1) {
 		return error;
 	}
 	return _read_data(&fileEntry, buffer, offset, (offset + numbytes > fileEntry.iNodeStat.st_size ? fileEntry.iNodeStat.st_size - offset : numbytes));
 }
 
-int _bd_truncate(const char *pFilename, int offset)
+int				_bd_truncate(const char *pFilename,
+                             int offset)
 {
-	iNodeEntry fileEntry;
-	int error;
+	iNodeEntry	fileEntry;
+	int			error;
 	if ((error = _file_controle(&fileEntry, pFilename, offset)) == -1) {
 		return error;
 	}
