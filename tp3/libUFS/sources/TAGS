@@ -54,9 +54,9 @@ static int		_read_data(130,3628
 int				_bd_read(160,4588
 int				_bd_truncate(173,5022
 
-inode_tools.c,139
-inline bool_t isINodeFree(3,26
-int		reserveINode(10,261
-int		clearINode(37,1056
-int		saveINodeEntry(60,1701
-int getINodeEntry(84,2520
+inode_tools.c,140
+inline bool_t isINodeFree(8,125
+int		reserveINode(15,360
+int		clearINode(42,1155
+int		saveINodeEntry(65,1800
+int getINodeEntry(89,2619
