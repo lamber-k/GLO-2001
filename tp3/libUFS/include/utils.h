@@ -16,14 +16,6 @@ bool_t	entryExist(const iNodeEntry *currentINodeEntry, const char *entryName);
 // Get the i-Node @iNodeNum informations on @entry
 int getINodeEntry(const UINT16 iNodeNum, iNodeEntry *entry);
 
-// Find the Directory Entry on @currentINodeEntry who his name is entryName. Return info on @dirEntryFound
-int findDirEntryByName(const iNodeEntry *currentINodeEntry, const char *entryName, DirEntry *dirEntryFound);
-
-// Resolve the current section: searching @pathSection entry on @currentINodeEntry. Return info on @currentDirEntry
-int resolveSection(const char *pathSection, iNodeEntry *currentINodeEntry, DirEntry *currentDirEntry);
-
-// Resolve the entire path @path. Return info about it on @entryFound
-int resolvePath(char *path, iNodeEntry *entryFound);
 
 int directoryNewEntryPreconditions(const char *pFilename, 
 					  char basename[FILENAME_SIZE], 

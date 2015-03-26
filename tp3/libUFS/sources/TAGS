@@ -1,29 +1,23 @@
 
-utils.c,746
-inline bool_t isBlockFree(7,99
-inline bool_t isINodeFree(14,334
-inline bool_t moreBlockNeeded(21,569
-int		reserveINode(26,723
-int		clearINode(53,1518
-int		reserveBlock(76,2163
-static int	iNodeFindBlockPos(104,3027
-static int	iNodeDeleteBlock(116,3297
-int		clearBlock(135,3812
-int		saveINodeEntry(171,4929
-int getINodeEntry(195,5748
-int	findDirEntryByName(212,6234
-bool_t	entryExist(248,7393
-int	resolveSection(254,7594
-int	resolvePath(274,8296
-int	directoryNewEntryPreconditions(311,9512
-int	directoryAddEntrySelectBlock(348,10768
-int	directoryAddEntry(378,11840
-UINT16 numberOfDirEntry(416,13204
-int min(420,13282
-int max(424,13331
-int GetDirFromPath(434,13957
-int GetFilenameFromPath(463,14821
-void printiNode(488,15607
+utils.c,563
+inline bool_t isBlockFree(8,117
+inline bool_t isINodeFree(15,352
+inline bool_t moreBlockNeeded(22,587
+int		reserveINode(27,761
+int		clearINode(54,1556
+int		reserveBlock(77,2201
+static int	iNodeFindBlockPos(105,3065
+static int	iNodeDeleteBlock(117,3335
+int		clearBlock(136,3850
+int		saveINodeEntry(172,4967
+int getINodeEntry(196,5786
+int	directoryNewEntryPreconditions(214,6273
+int	directoryAddEntrySelectBlock(251,7529
+int	directoryAddEntry(281,8601
+UINT16 numberOfDirEntry(319,9965
+int min(323,10043
+int max(327,10092
+void printiNode(333,10228
 
 disque.c,88
 static const char DiskName[DiskName8,180
@@ -31,28 +25,36 @@ int ReadBlock(11,263
 int WriteBlock(31,896
 
 UFS.c,292
-int	bd_countfreeblocks(14,383
-int		bd_stat(33,828
-int		bd_create(50,1249
-int bd_read(92,2701
-int bd_write(100,2931
-int bd_truncate(108,3169
-int		bd_mkdir(117,3328
-int bd_hardlink(173,5365
-int bd_unlink(178,5456
-int bd_rmdir(183,5511
-int bd_rename(188,5565
-int bd_readdir(193,5647
+int	bd_countfreeblocks(15,401
+int		bd_stat(34,846
+int		bd_create(51,1267
+int bd_read(93,2719
+int bd_write(101,2949
+int bd_truncate(109,3187
+int		bd_mkdir(118,3346
+int bd_hardlink(174,5383
+int bd_unlink(179,5474
+int bd_rmdir(184,5529
+int bd_rename(189,5583
+int bd_readdir(194,5665
 
 block_tools.c,42
 int addBlock(5,65
 int freeBlock(40,1075
 
+path.c,173
+int	findDirEntryByName(8,118
+bool_t	entryExist(44,1277
+int	resolveSection(50,1478
+int	resolvePath(70,2180
+int GetDirFromPath(113,3973
+int GetFilenameFromPath(142,4837
+
 io_operation.c,212
-static int _find_block_by_offset(7,104
-static int _file_controle(23,498
-static int _write_data(56,1319
-int _bd_write(110,3032
-static int _read_data(120,3303
-int _bd_read(147,4174
-int _bd_truncate(157,4528
+static int _find_block_by_offset(8,122
+static int _file_controle(24,516
+static int _write_data(57,1337
+int _bd_write(111,3050
+static int _read_data(121,3321
+int _bd_read(148,4192
+int _bd_truncate(158,4546

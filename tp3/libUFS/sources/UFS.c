@@ -6,6 +6,7 @@
 #include "disque.h"
 #include "utils.h"
 #include "io_operation.h"
+#include "path.h"
 
 /* ----------------------------------------------------------------------------------------
    à vous de jouer, maintenant!

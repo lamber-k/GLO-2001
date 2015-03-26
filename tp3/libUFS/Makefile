@@ -3,6 +3,7 @@ NAME =	libUFS.a
 SRCS =	UFS.c		\
 	disque.c	\
 	utils.c		\
+	path.c		\
 	io_operation.c	\
 	block_tools.c	\
 
