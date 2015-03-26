@@ -10,6 +10,6 @@ int findDirEntryByName(const iNodeEntry *currentINodeEntry, const char *entryNam
 int resolveSection(const char *pathSection, iNodeEntry *currentINodeEntry, DirEntry *currentDirEntry);
 
 // Resolve the entire path @path. Return info about it on @entryFound
-int resolvePath(char *path, iNodeEntry *entryFound);
+int resolvePath(const char *path, iNodeEntry *entryFound);
 
 #endif // !PATH_H

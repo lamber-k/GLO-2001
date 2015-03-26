@@ -19,31 +19,31 @@ static const char DiskName[DiskName8,180
 int ReadBlock(11,263
 int WriteBlock(31,896
 
-UFS.c,292
+UFS.c,291
 int	bd_countfreeblocks(16,426
 int		bd_stat(35,871
-int		bd_create(52,1292
-int bd_read(94,2744
-int bd_write(102,2974
-int bd_truncate(110,3212
-int		bd_mkdir(119,3371
-int bd_hardlink(175,5408
-int bd_unlink(180,5499
-int bd_rmdir(185,5554
-int bd_rename(190,5608
-int bd_readdir(195,5690
+int		bd_create(49,1232
+int bd_read(91,2684
+int bd_write(99,2914
+int bd_truncate(107,3152
+int		bd_mkdir(116,3311
+int bd_hardlink(172,5348
+int bd_unlink(177,5439
+int bd_rmdir(182,5494
+int bd_rename(187,5548
+int bd_readdir(192,5630
 
 block_tools.c,46
 int			addBlock(5,65
 int			freeBlock(40,1077
 
-path.c,173
+path.c,174
 int	findDirEntryByName(9,143
 bool_t	entryExist(45,1302
 int	resolveSection(51,1503
-int	resolvePath(71,2205
-int GetDirFromPath(114,3998
-int GetFilenameFromPath(143,4862
+int		resolvePath(71,2205
+int GetDirFromPath(119,4117
+int GetFilenameFromPath(148,4981
 
 io_operation.c,225
 static int		_find_block_by_offset(9,147

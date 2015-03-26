@@ -68,26 +68,29 @@ int	resolveSection(const char *pathSection, iNodeEntry *currentINodeEntry, DirEn
   return (0);
 }
 
-int	resolvePath(char *path, iNodeEntry *entryFound) {
+int		resolvePath(const char *path, iNodeEntry *entryFound) {
   iNodeEntry	currentINodeEntry;
   DirEntry	currentDirEntry;
   char		*saveptrPFilename;
   char		*pathSection;
+  char		*pathDup = strdup(path);
 
   if (getINodeEntry(ROOT_INODE, &currentINodeEntry) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: getINodeEntry(%d) Failure\n", __PRETTY_FUNCTION__, ROOT_INODE);
 #endif
+    free(pathDup);
     return (-1);
   }
 
-  pathSection = strtok_r(path, PATH_DELIMITER, &saveptrPFilename);
+  pathSection = strtok_r(pathDup, PATH_DELIMITER, &saveptrPFilename);
   do {
     printf("part: %s\n", pathSection);
     if (resolveSection(pathSection, &currentINodeEntry, &currentDirEntry) == -1) {
 #if !defined(NDEBUG)
       fprintf(stderr, "Function: %s: resolveSection(%d, %s) Failure. Entry don't exist\n", __PRETTY_FUNCTION__, ROOT_INODE, pathSection);
 #endif
+      free(pathDup);
       return (-1);    
     }
   }
@@ -100,8 +103,10 @@ int	resolvePath(char *path, iNodeEntry *entryFound) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: getINodeEntry(%d) Failure\n", __PRETTY_FUNCTION__, ROOT_INODE);
 #endif
+    free(pathDup);
     return (-1);
   }
+  free(pathDup);
   return (0);
 }
 

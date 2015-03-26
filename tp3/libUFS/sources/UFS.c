@@ -35,17 +35,14 @@ int	bd_countfreeblocks(void)
 int		bd_stat(const char *pFilename, gstat *pStat)
 {
   iNodeEntry	entryFound;
-  char		*path = strdup(pFilename);
 
-  if (resolvePath(path, &entryFound) == -1) {
+  if (resolvePath(pFilename, &entryFound) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: resolvePath(%s) Failure\n", __PRETTY_FUNCTION__, pFilename);
 #endif
-    free(path);
     return (-1);
   }
   memcpy(pStat, &entryFound.iNodeStat, sizeof(entryFound.iNodeStat));
-  free(path);
   return (0);
 }
 
@@ -197,16 +194,13 @@ int bd_readdir(const char *pDirLocation, DirEntry **ppListeFichiers)
   iNodeEntry	directoryINodeEntry;
   UINT16	numEntries = 0;
   UINT16	currentBlock = 0;
-  char		*path = strdup(pDirLocation);
 
-  if (resolvePath(path, &directoryINodeEntry) == -1) {
+  if (resolvePath(pDirLocation, &directoryINodeEntry) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: resolvePath(%s) failure\n", __PRETTY_FUNCTION__, pDirLocation);
 #endif
-    free(path);
     return (-1);
   }
-  free(path);
   if (!G_ISDIR(directoryINodeEntry.iNodeStat.st_mode)) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: %s is not a directory\n", __PRETTY_FUNCTION__, pDirLocation);
