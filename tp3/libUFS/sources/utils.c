@@ -41,7 +41,7 @@ int	reserveBlock(iNodeEntry *reservedBlock) {
 	return (-1);
       }
       if (reservedBlock->iNodeStat.st_blocks == 0)
-	reservedBlock->iNodeStat.st_ino = currentBlock;
+		reservedBlock->iNodeStat.st_ino = currentBlock;
       reservedBlock->Block[reservedBlock->iNodeStat.st_blocks] = currentBlock;
       reservedBlock->iNodeStat.st_blocks++;
       return (0);
