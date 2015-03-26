@@ -4,6 +4,7 @@
 #include	<string.h>
 #include	"disque.h"
 #include	"path.h"
+#include	"inode_tools.h"
 
 int	findDirEntryByName(const iNodeEntry *currentINodeEntry, const char *entryName, DirEntry *dirEntryFound) {
   const UINT16	numDirectoryEntries = currentINodeEntry->iNodeStat.st_size / sizeof(DirEntry);

@@ -13,10 +13,6 @@ inline bool_t isBlockFree(const bool_t freeBlockBitmap[N_BLOCK_ON_DISK], const U
 // Test if the entry in @currentINodeEntry folder named @entryName exist.
 bool_t	entryExist(const iNodeEntry *currentINodeEntry, const char *entryName);
 
-// Get the i-Node @iNodeNum informations on @entry
-int getINodeEntry(const UINT16 iNodeNum, iNodeEntry *entry);
-
-
 int directoryNewEntryPreconditions(const char *pFilename, 
 					  char basename[FILENAME_SIZE], 
 					  char dirname[MAX_DIR_PATH_SIZE],
@@ -27,15 +23,6 @@ int reserveBlock(iNodeEntry *reservedINodeEntry);
 
 // Clear a Block on disk (call WriteBlock)
 int clearBlock(const ino blockToClear, iNodeEntry *INodeEntry);
-
-// Reserve an iNode on disk (call WriteBlock)
-int reserveINode(iNodeEntry *reservedINode);
-
-// Clear an iNode on disk (call WriteBlock)
-int clearINode(const ino iNodeToClear);
-
-// Save @toSave entry (call WriteBlock)
-int saveINodeEntry(const iNodeEntry *toSave);
 
 int	directoryAddEntry(iNodeEntry *parentDirectory, 
 				  iNodeEntry *newEntry,

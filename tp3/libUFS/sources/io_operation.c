@@ -4,6 +4,7 @@
 #include "disque.h"
 #include "block_tools.h"
 #include "path.h"
+#include "inode_tools.h"
 
 static int _find_block_by_offset(iNodeEntry *fileEntry, int offset)
 {
