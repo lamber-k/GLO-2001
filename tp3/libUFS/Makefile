@@ -1,9 +1,10 @@
 NAME =	libUFS.a
 
 SRCS =	UFS.c		\
-	disque.c		\
-	utils.c			\
+	disque.c	\
+	utils.c		\
 	io_operation.c	\
+	block_tools.c	\
 
 F.C	     +=	-W -Wall
 F.I	     += 
