@@ -1,18 +1,15 @@
 
-utils.c,413
+utils.c,293
 inline bool_t isBlockFree(9,142
 inline bool_t moreBlockNeeded(16,377
 int		reserveBlock(21,551
 static int	iNodeFindBlockPos(49,1415
 static int	iNodeDeleteBlock(61,1685
 int		clearBlock(80,2201
-int	directoryNewEntryPreconditions(116,3318
-int	directoryAddEntrySelectBlock(153,4574
-int	directoryAddEntry(183,5646
-UINT16 numberOfDirEntry(221,7010
-int min(225,7088
-int max(229,7137
-void printiNode(235,7273
+UINT16 numberOfDirEntry(117,3373
+int min(121,3451
+int max(125,3500
+void printiNode(131,3636
 
 disque.c,88
 static const char DiskName[DiskName8,180
@@ -29,13 +26,21 @@ int bd_truncate(108,3171
 int		bd_mkdir(117,3330
 int		bd_hardlink(173,5367
 int bd_unlink(178,5503
-int bd_rmdir(183,5558
-int bd_rename(188,5612
-int bd_readdir(193,5694
+int bd_rmdir(183,5583
+int bd_rename(188,5637
+int bd_readdir(193,5719
 
-links.c,59
-static int	isHardlinkValid(7,101
-int		addHardlink(25,644
+links.c,368
+static int	isHardlinkValid(9,141
+int		addHardlink(27,684
+static int	deleteHardlinkRemoveFile(59,1868
+int		deleteHardlink(91,2844
+int	directoryNewEntryPreconditions(141,4522
+int	directoryAddEntrySelectBlock(178,5778
+int	directoryAddEntry(208,6850
+static int		compressionSave(245,8159
+static int		compressionDirEntries(279,9360
+int	directoryDelEntry(319,10914
 
 block_tools.c,46
 int			addBlock(5,65
@@ -47,8 +52,8 @@ bool_t	entryExist(45,1302
 int	resolveSection(51,1503
 int		resolvePath(73,2320
 int splitFilenameAndPath(116,3722
-int GetDirFromPath(133,4636
-int GetFilenameFromPath(162,5500
+int GetDirFromPath(133,4650
+int GetFilenameFromPath(162,5514
 
 io_operation.c,225
 static int		_find_block_by_offset(9,147

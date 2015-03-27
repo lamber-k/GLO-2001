@@ -29,6 +29,7 @@ int	bd_countfreeblocks(void)
   while (i < N_BLOCK_ON_DISK) {
     if (isBlockFree(freeBlockBitmap, i))
       freeBlockNumber++;
+    ++i;
   }
   return freeBlockNumber;
 }
@@ -177,7 +178,7 @@ int		bd_hardlink(const char *pPathExistant, const char *pPathNewHardlink)
 
 int bd_unlink(const char *pFilename)
 {
-  return -1;
+  return (deleteHardlink(pFilename));
 }
 
 int bd_rmdir(const char *pFilename)

@@ -8,7 +8,7 @@
 
 inline bool_t isBlockFree(const bool_t freeBlockBitmap[N_BLOCK_ON_DISK], const UINT16 blockNum) {
 #if !defined(NDEBUG)
-  assert(blockNum > 0 && blockNum < N_BLOCK_ON_DISK);
+  assert(blockNum >= 0 && blockNum < N_BLOCK_ON_DISK);
 #endif
   return (freeBlockBitmap[blockNum] == BLOCK_FREE);
 }
@@ -107,110 +107,6 @@ int		clearBlock(const ino blockToClear, iNodeEntry *iNodeEntry) {
   if (WriteBlock(FREE_INODE_BITMAP, (const char *)(blockBitmap)) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: WriteBlock Failure\n", __PRETTY_FUNCTION__);
-#endif
-    return (-1);
-  }
-  return (0);
-}
-
-int	directoryNewEntryPreconditions(const char *pFilename, 
-				       char basename[FILENAME_SIZE], 
-				       char dirname[MAX_DIR_PATH_SIZE],
-				       iNodeEntry *parentDirectoryEntry) {
-  if (GetFilenameFromPath(pFilename, basename) == 0) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: GetFilenameFromPath(%s) Failure\n", __PRETTY_FUNCTION__, pFilename);
-#endif
-    return (-1);
-  }
-  if (GetDirFromPath(pFilename, dirname) == 0) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: GetDirFromPath(%s) Failure\n", __PRETTY_FUNCTION__, pFilename);
-#endif
-    return (-1);
-  }
-  if (resolvePath(dirname, parentDirectoryEntry) == -1) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: resolvePath(%s) Failure\n", __PRETTY_FUNCTION__, dirname);
-#endif
-    return (-1);
-  }
-  if (parentDirectoryEntry->iNodeStat.st_size == MAX_ENTRIES_SIZE) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: maximum entries reached for %s\n", __PRETTY_FUNCTION__, dirname);
-#endif
-    return (-1);
-  }
-  if (entryExist(parentDirectoryEntry, basename) == TRUE) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: %s already exist on directory %s\n", __PRETTY_FUNCTION__, basename, dirname);
-#endif
-    return (-2);
-  }
-  return (0);
-}
-
-int	directoryAddEntrySelectBlock(iNodeEntry *parentDirectory,
-				     ino *newEntryParentBlockIndex,
-				     DirEntry dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK]) {
-  if (moreBlockNeeded(parentDirectory->iNodeStat.st_size, sizeof(DirEntry)) == TRUE) {
-    if (reserveBlock(parentDirectory) == -1) {
-#if !defined(NDEBUG)
-      fprintf(stderr, "Function: %s: reserveblock() failure\n", __PRETTY_FUNCTION__);
-#endif
-      return (-1);
-    }
-  }
-  *newEntryParentBlockIndex = parentDirectory->Block[parentDirectory->iNodeStat.st_blocks - 1];
-  parentDirectory->iNodeStat.st_size += sizeof(DirEntry);
-
-  if (ReadBlock(*newEntryParentBlockIndex, (char *)(dirEntryBlock)) == -1) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, *newEntryParentBlockIndex);
-#endif
-    return (-1);
-  }
-  if (saveINodeEntry(parentDirectory) == -1) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__, 
-	    parentDirectory->iNodeStat.st_ino);
-#endif
-    return (-1);
-  }
-  return (0);
-}
-
-int	directoryAddEntry(iNodeEntry *parentDirectory, 
-			  iNodeEntry *newEntry,
-			  const char *newEntryName) {
-  ino		newEntryParentBlockIndex;
-  DirEntry	dirEntryBlock[NUM_DIR_ENTRY_PER_BLOCK];
-  UINT16	entryBlockIndex;
-
-  memset(dirEntryBlock, 0, sizeof(dirEntryBlock));
-  if (directoryAddEntrySelectBlock(parentDirectory, &newEntryParentBlockIndex, dirEntryBlock)) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: directoryAddEntrySelectBlock(%d) Failure\n", __PRETTY_FUNCTION__, 
-	    parentDirectory->iNodeStat.st_ino);
-#endif
-    return (-1);
-  }
-
-  entryBlockIndex = (numberOfDirEntry(parentDirectory->iNodeStat.st_size) - 1) % NUM_DIR_ENTRY_PER_BLOCK;
-  strcpy(dirEntryBlock[entryBlockIndex].Filename, newEntryName);
-  dirEntryBlock[entryBlockIndex].iNode = newEntry->iNodeStat.st_ino;
-  newEntry->iNodeStat.st_nlink++;
-
-  if (WriteBlock(newEntryParentBlockIndex, (const char *)(dirEntryBlock)) == -1) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: WriteBlock(%d) Failure\n", __PRETTY_FUNCTION__, newEntryParentBlockIndex);
-#endif
-    return (-1);
-  }
-  if (saveINodeEntry(newEntry) == -1) {
-#if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__, 
-	    newEntry->iNodeStat.st_ino);
 #endif
     return (-1);
   }
