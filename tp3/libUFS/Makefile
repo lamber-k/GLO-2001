@@ -7,6 +7,7 @@ SRCS =	UFS.c		\
 	io_operation.c	\
 	inode_tools.c	\
 	block_tools.c	\
+	links.c		\
 
 F.C	     +=	-W -Wall
 F.I	     += 

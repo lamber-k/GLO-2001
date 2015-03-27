@@ -19,31 +19,36 @@ static const char DiskName[DiskName8,180
 int ReadBlock(11,263
 int WriteBlock(31,896
 
-UFS.c,291
-int	bd_countfreeblocks(16,426
-int		bd_stat(35,871
-int		bd_create(49,1232
-int bd_read(91,2684
-int bd_write(99,2914
-int bd_truncate(107,3152
-int		bd_mkdir(116,3311
-int bd_hardlink(172,5348
-int bd_unlink(177,5439
-int bd_rmdir(182,5494
-int bd_rename(187,5548
-int bd_readdir(192,5630
+UFS.c,293
+int	bd_countfreeblocks(17,445
+int		bd_stat(36,890
+int		bd_create(50,1251
+int bd_read(92,2703
+int bd_write(100,2933
+int bd_truncate(108,3171
+int		bd_mkdir(117,3330
+int		bd_hardlink(173,5367
+int bd_unlink(178,5503
+int bd_rmdir(183,5558
+int bd_rename(188,5612
+int bd_readdir(193,5694
+
+links.c,59
+static int	isHardlinkValid(7,101
+int		addHardlink(25,644
 
 block_tools.c,46
 int			addBlock(5,65
 int			freeBlock(40,1077
 
-path.c,174
+path.c,209
 int	findDirEntryByName(9,143
 bool_t	entryExist(45,1302
 int	resolveSection(51,1503
-int		resolvePath(71,2205
-int GetDirFromPath(119,4117
-int GetFilenameFromPath(148,4981
+int		resolvePath(73,2320
+int splitFilenameAndPath(116,3722
+int GetDirFromPath(133,4636
+int GetFilenameFromPath(162,5500
 
 io_operation.c,225
 static int		_find_block_by_offset(9,147

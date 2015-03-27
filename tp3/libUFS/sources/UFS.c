@@ -8,6 +8,7 @@
 #include "io_operation.h"
 #include "path.h"
 #include "inode_tools.h"
+#include "links.h"
 
 /* ----------------------------------------------------------------------------------------
    à vous de jouer, maintenant!
@@ -169,9 +170,9 @@ int		bd_mkdir(const char *pDirName)
   return (0);
 }
 
-int bd_hardlink(const char *pPathExistant, const char *pPathNouveauLien)
+int		bd_hardlink(const char *pPathExistant, const char *pPathNewHardlink)
 {
-  return -1;
+  return (addHardlink(pPathExistant, pPathNewHardlink));
 }
 
 int bd_unlink(const char *pFilename)
@@ -195,7 +196,7 @@ int bd_readdir(const char *pDirLocation, DirEntry **ppListeFichiers)
   UINT16	numEntries = 0;
   UINT16	currentBlock = 0;
 
-  if (resolvePath(pDirLocation, &directoryINodeEntry) == -1) {
+  if (resolvePath(pDirLocation, &directoryINodeEntry) != 0) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: resolvePath(%s) failure\n", __PRETTY_FUNCTION__, pDirLocation);
 #endif

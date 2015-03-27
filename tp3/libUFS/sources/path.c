@@ -16,7 +16,7 @@ int	findDirEntryByName(const iNodeEntry *currentINodeEntry, const char *entryNam
     fprintf(stderr, "Function: %s: %d iNode is not a directory\n", __PRETTY_FUNCTION__, 
 	    currentINodeEntry->iNodeStat.st_ino);
 #endif
-    return (-1);
+    return (-2);
   }
   while (i < numDirectoryEntries) {
     if (i % NUM_DIR_ENTRY_PER_BLOCK == 0) {
@@ -49,13 +49,15 @@ bool_t	entryExist(const iNodeEntry *currentINodeEntry, const char *entryName) {
 }
 
 int	resolveSection(const char *pathSection, iNodeEntry *currentINodeEntry, DirEntry *currentDirEntry) {
+  int   findDirEntryByNameResult;
+
   if (pathSection != NULL) {
-    if (findDirEntryByName(currentINodeEntry, pathSection, currentDirEntry) == -1) {
+    if ((findDirEntryByNameResult = findDirEntryByName(currentINodeEntry, pathSection, currentDirEntry)) != 0) {
 #if !defined(NDEBUG)
-      fprintf(stderr, "Function: %s: findDirEntry(%d, %s) Failure. Entry don't exist\n", __PRETTY_FUNCTION__, 
-	      currentINodeEntry->iNodeStat.st_ino, pathSection);
+      fprintf(stderr, "Function: %s: findDirEntry(%d, %s): %d Failure. Entry don't exist\n", __PRETTY_FUNCTION__, 
+	      currentINodeEntry->iNodeStat.st_ino, pathSection, findDirEntryByNameResult);
 #endif
-      return (-1);
+      return (findDirEntryByNameResult);
     }
 
     if (getINodeEntry(currentDirEntry->iNode, currentINodeEntry) == -1) {
@@ -74,6 +76,7 @@ int		resolvePath(const char *path, iNodeEntry *entryFound) {
   char		*saveptrPFilename;
   char		*pathSection;
   char		*pathDup = strdup(path);
+  int		resolveSectionReturn;
 
   if (getINodeEntry(ROOT_INODE, &currentINodeEntry) == -1) {
 #if !defined(NDEBUG)
@@ -86,12 +89,12 @@ int		resolvePath(const char *path, iNodeEntry *entryFound) {
   pathSection = strtok_r(pathDup, PATH_DELIMITER, &saveptrPFilename);
   do {
     printf("part: %s\n", pathSection);
-    if (resolveSection(pathSection, &currentINodeEntry, &currentDirEntry) == -1) {
+    if ((resolveSectionReturn = resolveSection(pathSection, &currentINodeEntry, &currentDirEntry)) != 0) {
 #if !defined(NDEBUG)
       fprintf(stderr, "Function: %s: resolveSection(%d, %s) Failure. Entry don't exist\n", __PRETTY_FUNCTION__, ROOT_INODE, pathSection);
 #endif
       free(pathDup);
-      return (-1);    
+      return (resolveSectionReturn);
     }
   }
   while ((pathSection = strtok_r(NULL, PATH_DELIMITER, &saveptrPFilename)) != NULL);
@@ -109,6 +112,17 @@ int		resolvePath(const char *path, iNodeEntry *entryFound) {
   free(pathDup);
   return (0);
 }
+
+int splitFilenameAndPath(const char *path, char basename[FILENAME_SIZE], char dirname[MAX_DIR_PATH_SIZE]) {
+  if (GetDirFromPath(path, dirname) == 0 || GetFilenameFromPath(path, basename) == 0) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s Failure with path: %s\n", __PRETTY_FUNCTION__, path);
+#endif
+    return (-1);
+  }
+  return (0);
+}
+
 
 /* Cette fonction va extraire le repertoire d'une chemin d'acces complet, et le copier
    dans pDir.  Par exemple, si le chemin fourni pPath="/doc/tmp/a.txt", cette fonction va
