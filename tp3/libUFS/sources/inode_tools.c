@@ -1,8 +1,13 @@
+#include	<stdlib.h>
+#include	<string.h>
+#include	<stdio.h>
+#include	<assert.h>
+#include	"disque.h"
 #include	"inode_tools.h"
 
 inline bool_t isINodeFree(const bool_t freeINodeBitmap[N_INODE_ON_DISK], const UINT16 inodeNum) {
 #if !defined(NDEBUG)
-  assert(inodeNum > 0 && inodeNum < N_INODE_ON_DISK);
+  assert(inodeNum >= 0 && inodeNum < N_INODE_ON_DISK);
 #endif
   return (freeINodeBitmap[inodeNum] == INODE_FREE);
 }
