@@ -119,7 +119,6 @@ echo "-----------------------------------------------------------------------"
 ./ufs read /b.txt 500 30
 ./ufs read /b.txt 500 100
 
-exit
 echo
 echo
 echo "--------------------------------------------------------------------"
@@ -220,6 +219,7 @@ echo "            Tester la fonction rename sur répertoire"
 echo "--------------------------------------------------------------------"
 ./ufs ls /Bonjour
 ./ufs ls /doc
+./ufs ls /
 ./ufs rename /doc/tmp /Bonjour/tmpmv
 echo -e "\nOn vérifie que le nombre de lien pour /Bonjour augmente de 1 et qu'il diminue de 1 pour /doc:"
 ./ufs ls /
