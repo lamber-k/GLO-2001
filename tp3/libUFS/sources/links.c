@@ -349,7 +349,7 @@ int	directoryDelEntry(iNodeEntry *parentDirectory,
 int	changeParentDirectory(iNodeEntry *dirEntry, iNodeEntry *parentDestinationDir, iNodeEntry *parentSourceDir) {
   DirEntry	blockEntries[NUM_DIR_ENTRY_PER_BLOCK];
 
-  if (parentDestinationDir == parentSourceDir)
+  if (parentDestinationDir->iNodeStat.st_ino == parentSourceDir->iNodeStat.st_ino)
     return (0);
   if (ReadBlock(*dirEntry->Block, (char *)(blockEntries)) == -1) {
 #if !defined(NDEBUG)
@@ -382,4 +382,39 @@ int	changeParentDirectory(iNodeEntry *dirEntry, iNodeEntry *parentDestinationDir
   }
 
   return (0);
+}
+
+int	renameInSameDirectory(const iNodeEntry *parentDir, const char *sourceFilename, const char *destFilename) {
+  const UINT16	numDirectoryEntries = parentDir->iNodeStat.st_size / sizeof(DirEntry);
+  DirEntry	blockEntries[NUM_DIR_ENTRY_PER_BLOCK];
+  int		i = 0;
+  
+  while (i < numDirectoryEntries) {
+    const UINT16	currentBlock = i / NUM_DIR_ENTRY_PER_BLOCK;
+
+    if (i % NUM_DIR_ENTRY_PER_BLOCK == 0) {
+
+      if (ReadBlock(parentDir->Block[currentBlock], (char *)(blockEntries)) == -1) {
+#if !defined(NDEBUG)
+	fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, currentBlock);
+#endif
+	return (-1);
+      }
+    }
+
+    DirEntry	*currentEntry = blockEntries + (i % NUM_DIR_ENTRY_PER_BLOCK);
+
+    if (strcmp(currentEntry->Filename, sourceFilename) == 0) {
+      strncpy(currentEntry->Filename, destFilename, FILENAME_SIZE);
+      if (WriteBlock(parentDir->Block[currentBlock], (char *)(blockEntries)) == -1) {
+#if !defined(NDEBUG)
+	fprintf(stderr, "Function: %s: WriteBlock(%d) Failure\n", __PRETTY_FUNCTION__, currentBlock);
+#endif
+	return (-1);
+      }      
+      return (0);
+    }
+    ++i;
+  }
+  return (-1);
 }

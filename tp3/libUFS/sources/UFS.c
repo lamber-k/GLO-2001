@@ -348,6 +348,11 @@ int bd_rename(const char *pFilename, const char *pDestFilename)
 #endif
     return -1;
   }
+  if (destinationDir.iNodeStat.st_ino == sourceDir.iNodeStat.st_ino) {
+    free(pathDestinationDirectory);
+    free(pathSourceDirectory);
+    return (renameInSameDirectory(&destinationDir, fileNameSource, fileNameDestination));
+  }
   if (directoryAddEntry(&destinationDir, &fileEntry, fileNameDestination) != 0) {
     free(pathDestinationDirectory);
     free(pathSourceDirectory);
