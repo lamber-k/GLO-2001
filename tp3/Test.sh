@@ -41,6 +41,7 @@ echo "--------------------------------------------------------------------"
 ./ufs read /toto.txt 0 10
 ./ufs read /b.txt 0 10
 
+exit
 echo
 echo
 echo "--------------------------------------------------------------------"
@@ -227,6 +228,7 @@ echo -e "\nOn vérifie que le sous-réperoire tmpmv contient encore subtmp et ne
 ./ufs ls /Bonjour/tmpmv
 echo -e "\nOn vérifie que le nombre de lien vers ce même répertoire n'augmente pas si on répète l'opération:"
 ./ufs rename /Bonjour/tmpmv /Bonjour/tmpmv2
+./ufs ls /Bonjour
 ./ufs rename /Bonjour/tmpmv2 /Bonjour/tmpmv3
 ./ufs ls /Bonjour
 

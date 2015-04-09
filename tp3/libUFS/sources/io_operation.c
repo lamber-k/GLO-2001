@@ -38,14 +38,14 @@ static int		_file_controle(iNodeEntry *fileEntry,
   if (resolvePath(path, fileEntry) == -1) {
     free(path);
 #if defined(NDEBUG)
-    fprintf(stderr, "Function: %s: resolvePath(%s) failure\n", __PRETTY_FUNCTION__, path);
+    fprintf(stderr, "Function: %s: resolvePath(%s) failure\n", __PRETTY_FUNCTION__, pFilename);
 #endif
     return -1;
   }
   free(path);
   if (G_ISDIR(fileEntry->iNodeStat.st_mode)) {
 #if defined(NDEBUG)
-    fprintf(stderr, "Function: %s: %s is a directory\n", __PRETTY_FUNCTION__, path);
+    fprintf(stderr, "Function: %s: %s is a directory\n", __PRETTY_FUNCTION__, pFilename);
 #endif
     return -2;
   }
@@ -153,7 +153,6 @@ static int		_read_data(iNodeEntry *fileEntry,
     }
     int		localOffset = offset % BLOCK_SIZE;
     int		readSize = ((numbytes - numbytes_read) > BLOCK_SIZE - localOffset ? BLOCK_SIZE - localOffset :(numbytes - numbytes_read > BLOCK_SIZE ? BLOCK_SIZE - localOffset : numbytes - numbytes_read));
-    printf("%d %d %d %d %d\n", offset, localOffset, readSize, BLOCK_SIZE, numbytes - numbytes_read);
     memcpy(buffer + numbytes_read,
 	   readBuffer + localOffset,
 	   readSize);
@@ -170,7 +169,7 @@ int				_bd_read(const char *pFilename,
 {
   iNodeEntry	fileEntry;
   int			error;
-  if ((error = _file_controle(&fileEntry, pFilename, offset)) == -1) {
+  if ((error = _file_controle(&fileEntry, pFilename, offset)) != 0) {
     return error;
   }
   return _read_data(&fileEntry, buffer, offset, (offset + numbytes > fileEntry.iNodeStat.st_size ? fileEntry.iNodeStat.st_size - offset : numbytes));
