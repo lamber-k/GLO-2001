@@ -296,7 +296,7 @@ static int		compressionDirEntries(iNodeEntry *directoryINodeEntry,
 #endif
 	return (-1);
       }
-      nextEntry = blockEntries + ((i + 1) % NUM_DIR_ENTRY_PER_BLOCK);
+      nextEntry = newBlockEntries;
       currentEntry = blockEntries + (i % NUM_DIR_ENTRY_PER_BLOCK);
       memcpy(currentEntry, nextEntry, sizeof(DirEntry));
       if (WriteBlock(directoryINodeEntry->Block[currentBlock - 1], (char *)(blockEntries)) == -1) {
@@ -305,6 +305,7 @@ static int		compressionDirEntries(iNodeEntry *directoryINodeEntry,
 #endif
 	return (-1);
       }
+      memcpy(blockEntries, newBlockEntries, sizeof(newBlockEntries));
     }
     else {
       nextEntry = blockEntries + ((i + 1) % NUM_DIR_ENTRY_PER_BLOCK);
@@ -343,4 +344,42 @@ int	directoryDelEntry(iNodeEntry *parentDirectory,
     ++i;
   }
   return (-1);
+}
+
+int	changeParentDirectory(iNodeEntry *dirEntry, iNodeEntry *parentDestinationDir, iNodeEntry *parentSourceDir) {
+  DirEntry	blockEntries[NUM_DIR_ENTRY_PER_BLOCK];
+
+  if (parentDestinationDir == parentSourceDir)
+    return (0);
+  if (ReadBlock(*dirEntry->Block, (char *)(blockEntries)) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, *dirEntry->Block);
+#endif
+    return (-1);
+  }
+  blockEntries[1].iNode = parentDestinationDir->iNodeStat.st_ino;
+  if (WriteBlock(*dirEntry->Block, (char *)blockEntries) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: WriteBlock(%d) Failure\n", __PRETTY_FUNCTION__, *dirEntry->Block);
+#endif
+    return (-1);
+  }
+  parentSourceDir->iNodeStat.st_nlink--;
+  parentDestinationDir->iNodeStat.st_nlink++;
+  if (saveINodeEntry(parentSourceDir) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__,
+	    parentSourceDir->iNodeStat.st_ino);
+#endif
+    return (-1);
+  }
+  if (saveINodeEntry(parentDestinationDir) == -1) {
+#if !defined(NDEBUG)
+    fprintf(stderr, "Function: %s: saveINodeEntry(%d) failure\n", __PRETTY_FUNCTION__,
+	    parentDestinationDir->iNodeStat.st_ino);
+#endif
+    return (-1);
+  }
+
+  return (0);
 }

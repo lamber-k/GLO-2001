@@ -19,5 +19,6 @@ int	directoryAddEntry(iNodeEntry *parentDirectory,
 
 int	directoryDelEntry(iNodeEntry *parentDirectory,
 			  const char *deletedEntryName);
+int	changeParentDirectory(iNodeEntry *dirEntry, iNodeEntry *parentDestinationDir, iNodeEntry *parentSourceDir);
 
 #endif // !LINKS_H

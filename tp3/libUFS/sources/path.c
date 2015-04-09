@@ -88,7 +88,6 @@ int		resolvePath(const char *path, iNodeEntry *entryFound) {
 
   pathSection = strtok_r(pathDup, PATH_DELIMITER, &saveptrPFilename);
   do {
-    printf("part: %s\n", pathSection);
     if ((resolveSectionReturn = resolveSection(pathSection, &currentINodeEntry, &currentDirEntry)) != 0) {
 #if !defined(NDEBUG)
       fprintf(stderr, "Function: %s: resolveSection(%d, %s) Failure. Entry don't exist\n", __PRETTY_FUNCTION__, ROOT_INODE, pathSection);

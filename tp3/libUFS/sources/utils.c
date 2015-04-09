@@ -19,19 +19,19 @@ inline bool_t moreBlockNeeded(const UINT16 currentSize, const UINT16 spaceNeeded
 
 
 int		reserveBlock(iNodeEntry *reservedBlock) {
-  bool_t	iNodeBitmap[BLOCK_SIZE];
+  bool_t	blockBitmap[BLOCK_SIZE];
   UINT16	currentBlock = 1;
 
-  if (ReadBlock(FREE_INODE_BITMAP, (char *)(iNodeBitmap)) == -1) {
+  if (ReadBlock(FREE_BLOCK_BITMAP, (char *)(blockBitmap)) == -1) {
 #if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, FREE_INODE_BITMAP);
+    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, FREE_BLOCK_BITMAP);
 #endif
     return (-1);
   }
-  while (currentBlock < N_INODE_ON_DISK) {
-    if (isBlockFree(iNodeBitmap, currentBlock)) {
-      iNodeBitmap[currentBlock] = INODE_NOT_FREE;
-      if (WriteBlock(FREE_INODE_BITMAP, (const char *)(iNodeBitmap)) == -1) {
+  while (currentBlock < N_BLOCK_ON_DISK) {
+    if (isBlockFree(blockBitmap, currentBlock)) {
+      blockBitmap[currentBlock] = BLOCK_NOT_FREE;
+      if (WriteBlock(FREE_BLOCK_BITMAP, (const char *)(blockBitmap)) == -1) {
 #if !defined(NDEBUG)
 	fprintf(stderr, "Function: %s: WriteBlock Failure\n", __PRETTY_FUNCTION__);
 #endif
@@ -79,17 +79,17 @@ static int	iNodeDeleteBlock(iNodeEntry *iNodeEntry, const ino numBlock) {
 
 int		clearBlock(const ino blockToClear, iNodeEntry *iNodeEntry) {
   bool_t	blockBitmap[BLOCK_SIZE];
-  int		iNodeBlockPos;
+  int		blockBlockPos;
 
-  if ((iNodeBlockPos = iNodeFindBlockPos(iNodeEntry, blockToClear)) == -1) {
+  if ((blockBlockPos = iNodeFindBlockPos(iNodeEntry, blockToClear)) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: iNodeFindBlockPos() Failure\n", __PRETTY_FUNCTION__);
 #endif
     return (-1);
   }
-  if (ReadBlock(FREE_INODE_BITMAP, (char *)(blockBitmap)) == -1) {
+  if (ReadBlock(FREE_BLOCK_BITMAP, (char *)(blockBitmap)) == -1) {
 #if !defined(NDEBUG)
-    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, FREE_INODE_BITMAP);
+    fprintf(stderr, "Function: %s: ReadBlock(%d) Failure\n", __PRETTY_FUNCTION__, FREE_BLOCK_BITMAP);
 #endif
     return (-1);
   }
@@ -97,14 +97,14 @@ int		clearBlock(const ino blockToClear, iNodeEntry *iNodeEntry) {
 #if !defined(NDEBUG)
   assert(isBlockFree(blockBitmap, blockToClear) == FALSE);
 #endif
-  blockBitmap[blockToClear] = INODE_FREE;
+  blockBitmap[blockToClear] = BLOCK_FREE;
   if (iNodeDeleteBlock(iNodeEntry, blockToClear) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: iNodeDeleteBlock(%d) Failure\n", __PRETTY_FUNCTION__, blockToClear);
 #endif
     return (-1);
   }
-  if (WriteBlock(FREE_INODE_BITMAP, (const char *)(blockBitmap)) == -1) {
+  if (WriteBlock(FREE_BLOCK_BITMAP, (const char *)(blockBitmap)) == -1) {
 #if !defined(NDEBUG)
     fprintf(stderr, "Function: %s: WriteBlock Failure\n", __PRETTY_FUNCTION__);
 #endif
