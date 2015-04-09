@@ -9,6 +9,7 @@
 #include "path.h"
 #include "inode_tools.h"
 #include "links.h"
+#include "block_tools.h"
 
 /* ----------------------------------------------------------------------------------------
    à vous de jouer, maintenant!
@@ -248,6 +249,12 @@ int bd_rmdir(const char *pFilename)
 		fprintf(stderr, "Function: %s: directoryDelEntry(%s, %s) failure\n", __PRETTY_FUNCTION__, pathParentDirectory, directoryName);
 #endif
 		return -1;
+	}
+	if (freeBlock(&dirEntry, dirEntry.iNodeStat.st_blocks) != 0) {
+#if !defined(NDEBUG)
+	  fprintf(stderr, "Function: %s: freeBlock(%s) failure\n", __PRETTY_FUNCTION__, directoryName);
+	  return -1;
+#endif	
 	}
 	free(pathParentDirectory);
 	return 0;
